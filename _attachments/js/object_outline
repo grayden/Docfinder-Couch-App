@@ -1,0 +1,30 @@
+class lookup
+{
+    var host
+    var uri
+    var view_prefix
+    var selected_view
+    var match_value
+
+    db_get
+    filter 
+    extract_property
+    match_value
+    get_view
+    lookup_go
+    first_call
+}
+
+class column
+{
+    var column_counter
+    var link_counter
+
+    new_display_column
+    make_db_lookup_link
+    append_item_to_column
+    bind_lookup_to_link
+    append_items_array_to_column
+    append_data_to_column    
+    add_values_to_columnn
+}

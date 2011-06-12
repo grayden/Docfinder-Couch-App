@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <title>Scan</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+        <script src="js/jquery.couch.js"></script>
+        <script src="js/jquery.couch2.js"></script>
+        <script src="/_utils/script/json2.js"></script>
+        <script src="/_utils/script/sha1.js"></script>
+        <script src="js/lookup.js"></script>
+        <script src="js/my_utilities.js"></script>
+        <script src="js/lookup_prototype.js"></script>
+        <script type="text/javascript">
+            // Start when the document is ready
+            $(function()
+            {    
+                $("#start_button").click(first_call);
+            });
+        </script>
+        <link rel="stylesheet" href="css/stylesheet.css" type="text/css" media="screen" />
+    </head>   
+    <body>
+        <input type="button" value="Go" id="start_button" />
+
+        <select name="collection_choice" id="collection_choice">
+            <option value="Actiondate">Action Date</option>
+            <option value="City">City</option>
+            <option value="Country">Country</option>
+            <option value="Docdate">Doc Date</option>
+            <option value="Dockey">Doc Key</option>
+        </select>
+        <div class="data_container" id="data_columns_container">
+        </div>
+
+    </body>
+</html>

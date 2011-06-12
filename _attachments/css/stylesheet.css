@@ -1,0 +1,37 @@
+body
+{
+    font-size: 18px;
+}
+
+div.data_column
+{
+    border: solid black 1px;
+    margin: 0px 3px 0px 3px;
+    padding: 1px;
+    min-height: 300px;
+    min-width: 150px;
+    float: left;
+}
+
+div.data_container
+{
+    border: solid black 3px;
+    min-width: 475px;
+    float: left;
+}
+
+.data_container a:link
+{
+    text-decoration: none;
+}
+
+.data_container a:visited
+{
+    color:black;
+}
+
+.data_container a:hover
+{
+    color:blue;
+}
+

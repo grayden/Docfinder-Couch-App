@@ -1,0 +1,142 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+<script src="js/jquery.couch.js"></script>
+<script src="js/jquery.couch2.js"></script>
+<script src="/_utils/script/json2.js"></script>
+<script src="/_utils/script/sha1.js"></script>
+
+</head>
+<body>
+    <form id="frm" method="POST" >
+        <select id="startingpoint">
+            <option value="hasDockey">Doc Key</option>
+            <option value="hasCity">City</option>
+            <option value="hasCountry">Country</option>
+            <option value="hasActiondate">Action Date</option>
+            <option value="hasDacdate">Doc Date</option>
+            <option value="hasDate">Date</option>
+            <option value="hasDay">Day</option>
+            <option value="hasMonth">Month</option>
+            <option value="hasYear">Year</option>
+        </select>
+        <input type="text" id="key" value="val" />		
+        <input type="text" id="value" value="" />
+        <input type="submit" value="submit" />
+    </form>
+    <div id="rep">
+
+    </div>	
+<script>
+    var uri = "/docfinder/_design/docfinder/_view/";
+    var docs = {};
+    $(function() 
+    {
+        var results = [];
+        $("#frm").submit(function()
+        {
+            $.when(finder_start()).pipe(filter).pipe(get_derivatives).done(function(d)
+            {
+                $("#rep").html("<ul><li>"+render(d)+"</li></ul>");
+                $("#rep").trigger('contentchanged');
+            });
+            return false;
+        });
+        
+        $("#rep").bind('contentchanged',function()
+        {
+            console.log('c change');
+            $(this).find('.reload').each(function()
+            {
+                $(this).removeClass('reload');
+                var startingpoint = $(this).attr('class');
+                var view = startingpoint.split('_')[0];
+                var property = startingpoint.split('_')[1];
+                var value = $($("dt:contains("+startingpoint.replace('_','.')+")").next()[0]).text();
+                var self = this;
+                console.log('loading ' + view+"."+property);
+//                console.log('value: ' + value);
+                $.when(finder_derivative(view)).done(function(data)
+                {
+                    console.log(data.rows);
+//                    console.log('populating: ' + self )
+                    var ret = filter_by(data.rows,property,value);
+                    $(self).html("<ul><li>"+render(ret)+"</li></ul>");
+                    $("#rep").trigger('contentchanged');
+                });
+
+                
+            });
+        });
+
+    });
+    var finder_start = function()
+    {
+        return couch.get(uri + $("#startingpoint").val());
+    }
+    var finder_derivative = function(viewname)
+    {
+        var view = "has"+ viewname.charAt(0).toUpperCase() + viewname.slice(1);
+        return couch.get(uri + view);
+    }
+    var filter = function(resp)
+    {    
+        return filter_by(resp.rows,$("#key").val(),$("#value").val());
+    }
+    var filter_by = function(coll, property,value)
+    {
+        var match = [];
+        $.each(coll,function(key,val)
+        {
+            if (val.value && val.value[property] == value)
+            {
+                match.push(val.value)
+            }
+        });
+        return match;
+    }
+    var get_derivatives = function(matches)
+    {
+        $.each(matches,function(key,doc)
+        {
+            $.each(doc,function(property, value)
+            {
+                if (property.indexOf('.') != -1)
+                {
+                    var prop = property.split('.')[0];
+                    var key = property.split('.')[1];
+                    doc[prop+'_'+key] = 'loading...'; 
+                }
+            });
+        });
+
+        return matches;
+    }
+    render = function(obj)
+    {
+        var o = "<dl>";
+        $.each(obj,function(k,v)
+        {
+            var klass = k;
+            if (k)
+            {
+                k = k+"".replace('.','_');
+                klass = k;
+                if (k.indexOf('_') != -1 && k.indexOf('_') != 0 )
+                    klass = k + " reload";
+    
+            }   
+            
+            o += "<dt class='"+klass+"'>"+k+"</dt>";
+            if (typeof(v) == 'object') 
+                o += render(v);
+            else
+                o += "<dd>"+v+"</dd>";
+        });
+        return o;
+    }
+</script>
+
+
+</body>
+</html>
