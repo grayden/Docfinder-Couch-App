@@ -17,8 +17,7 @@ var custom_var_dump = function()
 // lookup object
 var db_get = function()
 {
-    var get_uri = this.uri + "_view/" + view_prefix + selected_view;
-    return couch.get(get_uri);
+    return couch.get(this.uri + "_view/" + this.view_prefix + this.view());
 }
 
 var first_call = function()
@@ -27,15 +26,12 @@ var first_call = function()
 }
 
 // lookup object
-function property_(property, view)
+function get_needed_property(property, view)
 {
     if (!$.isArray(property))
         return property;
     
-    if (view.toLowerCase() == property[0])
-        return property[1];
-    else
-        return property[0] + "." + property[1];
+    return (view.toLowerCase() == property[0])?(property[1]):(property[0] + "." + property[1]);
 }
 
 // lookup object
@@ -43,7 +39,7 @@ function filter(db_raw, view, property, match_value)
 {
     var matches = [];
 
-    property = property_(property, view);
+    property = lookup_inst.get_needed_property(property, view);
 
     $.each(db_raw.rows, function(index, elem){
 
@@ -66,11 +62,10 @@ function extract_property(link_obj)
     var html_class = ((link_obj.attr("class")));
     html_class = second_class(html_class);
 
-    if (html_class.indexOf(".") == -1)
-        return html_class;
+    if (html_class.indexOf(".") == -1) return html_class;
 
-    property_components = html_class.split(".");
-    return property_components;
+    needed_property_components = html_class.split(".");
+    return needed_property_components;
 }
 
 // lookup object
@@ -80,7 +75,7 @@ function match_value(link_obj)
 }
 
 // lookup object
-function get_view()
+function view()
 {
     selected_view = $("#collection_choice").val();
     return selected_view;
@@ -89,11 +84,11 @@ function get_view()
 // lookup object
 function lookup_go(first)
 {
-    var view = get_view();
+    var view = lookup_inst.view();
     if (first !== true)
     {
         var property = extract_property($(this));
-        var value = match_value($(this));
+        var value = lookup_inst.match_value($(this));
     }
     else
     {
@@ -137,11 +132,11 @@ var lookup = function()
 lookup.prototype.db_get = db_get;
 lookup.prototype.custom_var_dump = custom_var_dump;
 lookup.prototype.first_call = first_call;
-lookup.prototype.property_ = property_;
+lookup.prototype.get_needed_property = get_needed_property;
 lookup.prototype.extract_propert = extract_property;
 lookup.prototype.filter = filter;
 lookup.prototype.match_value = match_value;
-lookup.prototype.get_view = get_view;
+lookup.prototype.view = view;
 lookup.prototype.lookup_go = lookup_go;
 
 var lookup_inst = new lookup();

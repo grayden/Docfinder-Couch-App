@@ -1,17 +1,11 @@
 function isset(to_check)
 {
-    if (to_check || to_check === 0 || to_check === false)
-        return true;
-    else
-        return false;
+    return (to_check || to_check === 0 || to_check === false)?true:false;
 }
 
 function force_array(to_array)
 {
-    if ($.isArray(to_array))
-        return to_array;
-    else
-        return [to_array];
+    return ($.isArray(to_array))?to_array:[to_array];
 }
 
 function force_array_of_strings(arr)

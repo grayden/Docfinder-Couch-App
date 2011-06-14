@@ -41,7 +41,7 @@ describe("TaxonomyCircle" , function() {
         taxonomyCircle.update(taxonomy);
         expect(taxonomyCircle.taxonomyDepth()).toEqual(4);
     });
-    it("should get ring depth", function()
+/*    it("should get ring depth", function()
     {
         taxonomyCircle.update(taxonomy);
         expect(taxonomyCircle.getRingDepth(4)).toEqual([ 
@@ -54,7 +54,7 @@ describe("TaxonomyCircle" , function() {
             }
         ]);
     });
-
+*/
     it("should have a default x / y / size", function()
     {
         expect(taxonomyCircle.data.x).toBeDefined();
@@ -67,9 +67,8 @@ describe("TaxonomyCircle" , function() {
         taxonomyCircle.draw(paper);
         expect(taxonomyCircle.drawn()).toBeTruthy();
     });
-    
-    
-    
+     
+     
     it("should accept taxonomy data", function()
     {
           
@@ -78,7 +77,5 @@ describe("TaxonomyCircle" , function() {
         
         taxonomyCircle.draw();
         
-    });
-    
-    
+    });    
 });
