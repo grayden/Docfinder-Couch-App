@@ -1,10 +1,11 @@
 // lookup_object definitions
 
 // lookup object stuff
-var host = "127.0.0.1:5984"
+/* var host = "127.0.0.1:5984"
 var uri = "/docfinder/_design/docfinder/";
 var view_prefix = "has";
 var selected_view = ""
+*/
 
 var custom_var_dump = function()
 {
@@ -14,24 +15,35 @@ var custom_var_dump = function()
     alert(this.selected_view);
 }
 
-// lookup object
 var db_get = function()
 {
-    return couch.get(this.uri + "_view/" + this.view_prefix + this.view());
+    return couch.get(this.uri() + "/_view/" + this.view_prefix() + this.view());
 }
 
-var first_call = function()
-{
-    lookup_go(true);
-}
-
-// lookup object
 function get_needed_property(property, view)
 {
     if (!$.isArray(property))
         return property;
     
     return (view.toLowerCase() == property[0])?(property[1]):(property[0] + "." + property[1]);
+}
+
+// lookup object
+function match_value(link_obj)
+{
+    return (link_obj.html());
+}
+
+
+function extract_property(link_obj)
+{
+    var html_class = ((link_obj.attr("class")));
+    html_class = second_class(html_class);
+
+    if (html_class.indexOf(".") == -1) return html_class;
+
+    needed_property_components = html_class.split(".");
+    return needed_property_components;
 }
 
 // lookup object
@@ -56,30 +68,13 @@ function filter(db_raw, view, property, match_value)
     return matches;
 }
 
-// lookup object
-function extract_property(link_obj)
+
+
+var first_call = function()
 {
-    var html_class = ((link_obj.attr("class")));
-    html_class = second_class(html_class);
-
-    if (html_class.indexOf(".") == -1) return html_class;
-
-    needed_property_components = html_class.split(".");
-    return needed_property_components;
+    lookup_inst.lookup_go(true);
 }
 
-// lookup object
-function match_value(link_obj)
-{
-    return (link_obj.html());
-}
-
-// lookup object
-function view()
-{
-    selected_view = $("#collection_choice").val();
-    return selected_view;
-}
 
 // lookup object
 function lookup_go(first)
@@ -87,7 +82,7 @@ function lookup_go(first)
     var view = lookup_inst.view();
     if (first !== true)
     {
-        var property = extract_property($(this));
+        var property = lookup_inst.extract_property($(this));
         var value = lookup_inst.match_value($(this));
     }
     else
@@ -96,8 +91,8 @@ function lookup_go(first)
         var property = 'val';
         var value = "1";    
     }
-
-    $.when(db_get()).then(function(retrieved_data){
+console.log(lookup_inst);
+    $.when(lookup_inst.db_get()).then(function(retrieved_data){
 
         retrieved_data = filter(retrieved_data, view, property, value);
 
@@ -123,20 +118,40 @@ function lookup_go(first)
 /***** LOOKUP OBJECT PROTOTYPE *****/
 var lookup = function()
 {
-    this.host = "127.0.0.1:5984";
-    this.uri = "/docfinder/_design/docfinder";
-    this.view_prefix = "has";
-    this.selected_view = "";
+    this.host_ = "127.0.0.1:5984";
+    this.uri_ = "/docfinder/_design/docfinder";
+    this.view_prefix_ = "has";
+    this.view_ = "";
 }
+
+lookup.prototype.host = function()
+{
+    return this.host_;
+};
+
+lookup.prototype.uri = function()
+{
+    return this.uri_;
+};
+
+lookup.prototype.view_prefix = function()
+{
+    return this.view_prefix_;
+};
+
+lookup.prototype.view = function view()
+{
+    this.view_ = $("#collection_choice").val();
+    return this.view_;
+}
+
 
 lookup.prototype.db_get = db_get;
 lookup.prototype.custom_var_dump = custom_var_dump;
-lookup.prototype.first_call = first_call;
 lookup.prototype.get_needed_property = get_needed_property;
-lookup.prototype.extract_propert = extract_property;
+lookup.prototype.extract_property = extract_property;
 lookup.prototype.filter = filter;
 lookup.prototype.match_value = match_value;
-lookup.prototype.view = view;
 lookup.prototype.lookup_go = lookup_go;
 
 var lookup_inst = new lookup();
