@@ -16,6 +16,51 @@ TaxonomyCircle.prototype.draw = function(paper)
         
     var self = this;
     var texts = [];
+    
+    var tax = this.getWholeTaxonomy();
+    console.log(tax);
+    //var neighbourCount ;
+    var curDepth;
+    
+    var startAngle = 0;
+    var topNodesDrawn = 0;
+    var partition;
+    var circlePart = 360;
+    for (var i = tax.length - 1; i >= 0; i--)
+    {
+        if (tax[i].depth != curDepth)
+        {   
+            curDepth = tax[i].depth;
+            circlePart = tax[i].neighbours;    
+            
+            console.log('CN: ' + self.parentNeighbourCount(tax[i]));
+            neighbourCount = self.getRingDepth(curDepth).length;
+            if (topNodesDrawn == 0)
+            {
+                startAngle = 0;            
+            }
+            else
+            {
+                startAngle = topNodesDrawn * (360 / 3);
+            }
+            if (curDepth == 1)
+            {
+                topNodesDrawn++;
+            }
+            else
+            {
+            }
+
+        }
+        var size = self.data.size - 50;
+        var partition = circlePart / tax[i].neighbours;
+        self.drawSection(tax[i].value, size + (40 * curDepth + 1), startAngle, partition);
+        //texts.push(self.drawText(size,startAngle,partition+startAngle, partition,tax[i].value));
+        
+        startAngle += partition;
+    }
+    
+    /*
     for (var i = this.taxonomyDepth();i > 0; i--)
     {
         var d2 = this.getRingDepth(i);
@@ -32,6 +77,7 @@ TaxonomyCircle.prototype.draw = function(paper)
 
         break;
     }
+    */
     $.each(texts,function(k,v){v.toFront();});
     
     
@@ -85,10 +131,14 @@ TaxonomyCircle.prototype.getWholeTaxonomy = function()
 {
     return this.getFlattenedTaxonomy(this.data.taxonomy,1,[]);
 }
+TaxonomyCircle.prototype.parentNeighbourCount = function(item)
+{
+    return $(this.getRingDepth(item.depth)).grep(function(i){return i.value == item.value});
+}
 TaxonomyCircle.prototype.getRingDepth = function(depth)
 {
     var flattened = this.getWholeTaxonomy();
-    return $.grep(flattened,function(item) {return (item.depth == depth);});
+    return $.grep(flattened,function(item) {return (item.depth == parseInt(depth));});
 }
 TaxonomyCircle.prototype.getFlattenedTaxonomy = function(ar, depth, ret)
 {
@@ -97,7 +147,7 @@ TaxonomyCircle.prototype.getFlattenedTaxonomy = function(ar, depth, ret)
     {
         for(k in ar)
         {
-            ret.push({depth: depth, value : k});
+            ret.push({depth: depth, value : k,neighbours: ar.length});
             if (self.hasBranches(ar[k]))
                 ret = self.getFlattenedTaxonomy(ar[k],depth + 1,ret);
         }
@@ -110,7 +160,7 @@ TaxonomyCircle.prototype.getFlattenedTaxonomy = function(ar, depth, ret)
             if (self.isObject(v))
                 ret = self.getFlattenedTaxonomy(v,depth,ret);
             else
-                ret.push({depth: depth, value : v});
+                ret.push({depth: depth, value : v, neighbours: ar.length});
         });
     }    
     return ret;

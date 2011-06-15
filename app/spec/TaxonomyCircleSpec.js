@@ -26,6 +26,15 @@ describe("TaxonomyCircle" , function() {
                    ]
            }
           ];
+          taxonomy = 
+          [
+           {"Gender": ["Male", "Female"]}, 
+           {"Cars": 
+                    [
+                    'a' 
+                    ]
+           }
+          ];
 
     });
     it("should be able to be drawn to paper", function()
