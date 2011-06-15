@@ -14,53 +14,102 @@ TaxonomyCircle.prototype.draw = function(paper)
     if (paper != undefined) 
         this.paper = paper;
         
-    //console.log(this.data.taxonomy[0].Gender);
-    this.drawRing(this.data.taxonomy[1].Cars, this.data.size + 50, 360/3,360/3);
-    this.drawRing(this.data.taxonomy, this.data.size);
+    var self = this;
+    var texts = [];
+    
+    var tax = this.getWholeTaxonomy();
+    console.log(tax);
+    //var neighbourCount ;
+    var curDepth;
+    
+    var startAngle = 0;
+    var topNodesDrawn = 0;
+    var partition;
+    var circlePart = 360;
+    for (var i = tax.length - 1; i >= 0; i--)
+    {
+        if (tax[i].depth != curDepth)
+        {   
+            curDepth = tax[i].depth;
+            circlePart = tax[i].neighbours;    
+            
+            console.log('CN: ' + self.parentNeighbourCount(tax[i]));
+            neighbourCount = self.getRingDepth(curDepth).length;
+            if (topNodesDrawn == 0)
+            {
+                startAngle = 0;            
+            }
+            else
+            {
+                startAngle = topNodesDrawn * (360 / 3);
+            }
+            if (curDepth == 1)
+            {
+                topNodesDrawn++;
+            }
+            else
+            {
+            }
+
+        }
+        var size = self.data.size - 50;
+        var partition = circlePart / tax[i].neighbours;
+        self.drawSection(tax[i].value, size + (40 * curDepth + 1), startAngle, partition);
+        //texts.push(self.drawText(size,startAngle,partition+startAngle, partition,tax[i].value));
+        
+        startAngle += partition;
+    }
+    
+    /*
+    for (var i = this.taxonomyDepth();i > 0; i--)
+    {
+        var d2 = this.getRingDepth(i);
+        var startAngle = 0;
+        $.each(d2,function(k,v)
+        {
+            var size = self.data.size;
+            var partition = 360 / d2.length;
+            self.drawSection(v.value, size, startAngle, partition);
+            var endAngle = partition+startAngle;
+            texts.push(self.drawText(size,startAngle,endAngle, partition,v.value));
+            startAngle += partition;
+        });
+
+        break;
+    }
+    */
+    $.each(texts,function(k,v){v.toFront();});
+    
+    
     this.isDrawn = true;
     
     
 }
-
-TaxonomyCircle.prototype.drawRing = function(ring,size, ringLimit, startAngle)
+TaxonomyCircle.prototype.drawSection = function(txt,size,startAngle,partition)
 {
-    if (ringLimit == undefined)
-        ringLimit = 360;
-    if (startAngle == undefined)
-        startAngle = 0;
-    var partition = ringLimit / ring.length;
-    texts = [];
-    for (var i = 0; i < ring.length; i++)
-    {
-        var s  = this.sector(this.data.x, this.data.y,size, startAngle, partition + startAngle, 
+    
+    var s  = this.sector(this.data.x, this.data.y,size, startAngle, partition + startAngle, 
         {
                 stroke: "#222", 
                 "stroke-width": 1,
                 gradient: "90-#CACACA-#AAAACA"
         });
-        var r = size;
-        var endAngle = partition + startAngle;
-        var x1 = this.data.x + r * Math.cos(-startAngle * this.rad),
-            x2 = this.data.x + r * Math.cos(-endAngle * this.rad),
-            y1 = this.data.y + r * Math.sin(-startAngle * this.rad),
-            y2 = this.data.y + r * Math.sin(-endAngle * this.rad);
-
-        
-        tX = (x1 + x2) /2;
-        tY = (y1 + y2) /2;
-        var t = this.paper.text(tX, tY, this.getKey(ring[i]));
-        t.attr({fill: "#FFF", "font-family": 'Arial', "font-size": "20px", "text-anchor":"middle"});
-        t.rotate((startAngle + partition )/ (2 + endAngle + partition));
-        
-        texts.push(t);
-
-        startAngle += partition;
-    }    
-    $.each(texts,function(k,v)
-    {
-       v.toFront(); 
-    });
+};
+TaxonomyCircle.prototype.drawText = function(size,startAngle,endAngle,partition,txt)
+{
+    var x1 = this.data.x + size * Math.cos(-startAngle * this.rad),
+        x2 = this.data.x + size * Math.cos(-endAngle * this.rad),
+        y1 = this.data.y + size * Math.sin(-startAngle * this.rad),
+        y2 = this.data.y + size * Math.sin(-endAngle * this.rad);
+            
+    tX = (x1 + x2) /2;
+    tY = (y1 + y2) /2;
+    var t = this.paper.text(tX, tY, txt);
+    t.attr({fill: "#FFF", "font-family": 'Arial', "font-size": "20px", "text-anchor":"middle"});
+    t.rotate((startAngle + partition )/ (2 + endAngle + partition));
+    return t;
 }
+
 TaxonomyCircle.prototype.sector = function(cx, cy, r, startAngle, endAngle, params) 
 {
         var x1 = cx + r * Math.cos(-startAngle * this.rad),
@@ -78,70 +127,51 @@ TaxonomyCircle.prototype.taxonomyDepth = function()
 {
     return this.getDepth(this.data.taxonomy, 2);
 }
+TaxonomyCircle.prototype.getWholeTaxonomy = function()
+{
+    return this.getFlattenedTaxonomy(this.data.taxonomy,1,[]);
+}
+TaxonomyCircle.prototype.parentNeighbourCount = function(item)
+{
+    return $(this.getRingDepth(item.depth)).grep(function(i){return i.value == item.value});
+}
 TaxonomyCircle.prototype.getRingDepth = function(depth)
 {
-    var flattened = this.getFlattenedTaxonomy(this.data.taxonomy,0,[]);
-    console.log(flattened.toSource());
-    return flattened;
+    var flattened = this.getWholeTaxonomy();
+    return $.grep(flattened,function(item) {return (item.depth == parseInt(depth));});
 }
 TaxonomyCircle.prototype.getFlattenedTaxonomy = function(ar, depth, ret)
 {
     var self = this;    
-    depth++;
-    console.log('loop:');
-    console.log(ar.toSource());
-    //if (self.isObject(ar))
-    //    ar = [ar];
-    
     if (self.isObject(ar))
     {
         for(k in ar)
         {
-            ret.push({depth: depth, value : k});
+            ret.push({depth: depth, value : k,neighbours: ar.length});
             if (self.hasBranches(ar[k]))
-            {
-                console.log(true);
-            }
-            else
-                console.log(false);
+                ret = self.getFlattenedTaxonomy(ar[k],depth + 1,ret);
         }
         
     }
-    return ret;
-    /*
-    $.each(ar,function(k,v)
-    { 
-        if (self.isObject(v))
+    else if (self.isArray(ar))
+    {
+        $.each(ar,function(k,v)
         {
-            ret.push({depth: depth, value : self.getKey(v)});
-            //ret = ret.concat(self.getFlattenedTaxonomy(v, depth, []));
-        }
-        if (self.isArray(v))
-        {
-            $.each(v,function(l,w)
-            {
-                ret.push({depth: depth, value : w});
-            });
-        }
-        
-    });
+            if (self.isObject(v))
+                ret = self.getFlattenedTaxonomy(v,depth,ret);
+            else
+                ret.push({depth: depth, value : v, neighbours: ar.length});
+        });
+    }    
     return ret;
-    */
 }
 TaxonomyCircle.prototype.hasBranches = function(obj)
 {
     var self = this;
     
-    $.each(obj,function(l,v)
-    {
-        if (self.isObject(v) || self.isArray(v))
+    if (self.isObject(obj) || self.isArray(obj))
             return true;
-        $.each(v,function(k,w)
-        {
-            if (self.isObject(w) || self.isArray(w))
-                return true;
-        });
-    });
+    
     return false;
 }
 TaxonomyCircle.prototype.getDepth = function(obj, depth)
