@@ -13,258 +13,138 @@ var Log = {
 
 
 function init() {
-    //init data
-    var rootSunburstJSON = {
-      'id': 'sb0',
-      'name': '',
-      'data': {
-          '$type': 'none',
-          'sunburst':
-                       {
-                           id:"Cars",
-                           name: "cars",
-                           data: {
-                               "$angularWidth": 200,
-                               "$color": "#FAFAFA"
-                               },
-                           children: [
-                                {
-                                   id:"2-door",
-                                   name: "2-door",
-                                   data: {
-                                       "$angularWidth": 50,
-                                       "$color": "#BABBBB"
-                                       },
-                                   children: [
-                                       {
-                                       id:"farrariracecar",
-                                       name: "Farrari race car",
-                                       data: {
-                                           "$angularWidth": 50,
-                                           "$color": "#BABBBB"
-                                           },
-                                       children: []
-                                       },
-                                       {
-                                       id:"Corvette",
-                                       name: "Corvette",
-                                       data: {
-                                           "$angularWidth": 50,
-                                           "$color": "#BABBBB"
-                                           },
-                                       children: []
-                                       }
-                                   ]
-                               },
-                               {
-                                   data: {
-                                       "$angularWidth": 50,
-                                       "$color": "#CACCCC"
-                                       },
-                                   id:"Vans",
-                                   name: "Vans"                                              
-                               }
-                            ]
-                       }
-      },
-      'children':[
-        {
-            'id':'sb1',
-            'name': '',
-            'data': {
-                '$angularWidth': 20,
-                '$color': '#f55',
-                'sunburst':
-                       {
-                           id:"Gender",
-                           name: "Gender",
-                           data: {
-                               "$angularWidth": 200,
-                               "$color": "#FAFAFA"
-                               },
-                           children: [
-                               {
-                                   data: {
-                                       "$angularWidth": 50,
-                                       "$color": "#BABBBB"
-                                       },
-                                   id:"male",
-                                   name: "Male"
-                               },
-                               {
-                                   data: {
-                                       "$angularWidth": 50,
-                                       "$color": "#CACCCC"
-                                       },
-                                   id:"fmale",
-                                   name: "Female"                                              
-                               }
-                            ]
-                       }
+    daisy();
+}
+
+var daisy = function()
+{
+    var d = createStarburst(seedWizardNumber());
+    
+    $("#"+d.canvas.id).css("left","40%");
+    $("#"+d.canvas.id).css("top","20%");
+    
+    var t = createStarburst(seedTopics(4));
+    var g = createStarburst(seedGeographics(10));
+    var n = createStarburst(seedNames(10));
+    
+    
+}
+var createStarburst = function(data)
+{
+    var sbId = 'sb_'+data.id;
+    div = $('<div id="'+sbId+'" class="sb"></div>');
+    div.css("left",(($(".sb").length * 300)+50)+"px");
+    $("#"+id).append(div);
+    return createsb(sbId,data);
+    
+
+}
+var createsb = function(div,data)
+{
+    var sb = new $jit.Sunburst({
+            injectInto: div,
+
+            levelDistance: 40,
+            Node: {
+              overridable: true,
+              type: 'gradient-multipie'
             },
-            'children': []
-        }
-        
-      ]
+            Label: {
+              type: 'Native'
+            },
+            NodeStyles: {
+              enable: true,
+              type: 'Native',
+              stylesClick: {
+                'color': '#33dddd'
+              },
+              stylesHover: {
+                'color': '#dd3333'
+              }
+            },
+            clearCanvas: false  
+        });
+
+    //load JSON data.
+    sb.loadJSON(data);
+    sb.compute();
+    sb.refresh();   
+    return sb;
+}
+var seedWizardNumber = function()
+{
+    return   {
+       id: guid(),
+       name: Math.floor(Math.random()*100000),
+       data: { "$color": "#FAFAFA"},
+       children: [
+           {id:guid(),name:"Related",data :{}, children:seedChildDocs()},
+           {id:guid(),name:"Geographics",data: {}, children:[]},
+           {id:guid(),name:"Topics",data: {}, children:[]},
+           {id:guid(),name:"Name",data: {}, children:[]}
+       ]
     };
 
-
-
-    $jit.Hypertree.Plot.NodeTypes.implement({  
-            'sb': {  
-
-      'render': function(node, canvas) {
-        var nconfig = this.node,
-            dim = node.getData('dim'),
-            p = node.pos.getc();
-        dim = nconfig.transform? dim * (1 - p.squaredNorm()) : dim;
-        p.$scale(node.scale);
-/*
-        if (dim > 0.2) {
-          this.nodeHelper.circle.render('fill', p, dim, canvas);
-        }
-        */
-       /*
-                    bursts[node.data.id] = new $jit.Sunburst({
-                                                useCanvas: canvas,
-
-                                                levelDistance: 40,
-                                                Node: {
-                                                  overridable: true,
-                                                  type: 'gradient-multipie'
-                                                },
-                                                Label: {
-                                                  type: 'Native'
-                                                },
-                                                NodeStyles: {
-                                                  enable: true,
-                                                  type: 'Native',
-                                                  stylesClick: {
-                                                    'color': '#33dddd'
-                                                  },
-                                                  stylesHover: {
-                                                    'color': '#dd3333'
-                                                  }
-                                                },
-                                                clearCanvas: false  
-                                            });
-
-                        //load JSON data.
-                        bursts[node.data.id].loadJSON(node.data.sunburst);
-                        bursts[node.data.id].compute();
-                        bursts[node.data.id].refresh();
-                        */
-      },
-      'contains': function(node, pos) {
-        var dim = node.getData('dim'),
-            npos = node.pos.getc().$scale(node.scale);
-        return this.nodeHelper.circle.contains(npos, pos, dim);
-      },
-
-                    'Arender': function(node, canvas) {
-                        
-                        
-                        
-                    
-                    if (bursts[data.id] == undefined || true)
-                    {
-                        bursts[data.id] = new $jit.Sunburst({
-                                                useCanvas: canvas,
-
-                                                levelDistance: 40,
-                                                Node: {
-                                                  overridable: true,
-                                                  type: 'gradient-multipie'
-                                                },
-                                                Label: {
-                                                  type: 'Native'
-                                                },
-                                                NodeStyles: {
-                                                  enable: true,
-                                                  type: 'Native',
-                                                  stylesClick: {
-                                                    'color': '#33dddd'
-                                                  },
-                                                  stylesHover: {
-                                                    'color': '#dd3333'
-                                                  }
-                                                },
-                                                clearCanvas: false  
-                                            });
-
-                        //load JSON data.
-                        bursts[data.id].loadJSON(node.data.sunburst);
-                        bursts[data.id].compute();
-                        bursts[data.id].refresh();
-                    }
-                    
-                }
-                    
-                    
-            }
-    });
-/*
-    var container = new $jit.Hypertree(
+}
+var seedChildDocs = function()
+{
+    var ret = [];
+    for(var i = 0; i < Math.floor(Math.random()*20); i++)
     {
-        //useCanvas : container.canvas,
-        injectInto: id,
-        clickedNodeId: "",
-        clickedNodeName: "",
-        Node:
-        {
-           type: 'sb',
-           width: 100,
-           height: 100
-        },
-        onAfterPlotLine: function() {
-          
-        },
-        clearCanvas: true
-    
-    });
+        ret.push({id:guid(),name:Math.floor(Math.random()*100000),data :{}, children:[]});
+    }
+    return ret;
+}
+var seedNames = function(count)
+{
+   var items = ["Chung, Kristina H.","Chen, Paige H.","Melton, Sherri E.","Hill, Gretchen I.","Puckett, Karen U.","Song, Patrick O.","Hamilton, Elsie A.","Bender, Hazel E.","Wagner, Malcolm A.","McLaughlin, Dolores C.","McNamara, Francis C.","Raynor, Sandy A.","Moon, Marion O.","Woodard, Beth O.","Desai, Julia E.","Wallace, Jerome A.","Lawrence, Neal A.","Griffin, Jean R.","Dougherty, Kristine O.","Powers, Crystal O.","May, Alex A.","Steele, Eric T.","Teague, Wesley E.","Vick, Franklin I.","Gallagher, Claire A.","Solomon, Marian O.","Walsh, Marcia A.","Monroe, Dwight O.","Connolly, Wayne O.","Hawkins, Stephanie A.","Middleton, Neal I.","Goldstein, Gretchen O.","Watts, Tim A.","Johnston, Jerome O.","Weeks, Shelley E.","Wilkerson, Priscilla I.","Barton, Elsie A.","Walton, Beth A.","Hall, Erica A.","Ross, Douglas O.","Chung, Donald H.","Bender, Katherine E.","Woods, Paul O.","Mangum, Patricia A.","Joseph, Lois O.","Rosenthal, Louis O.","Bowden, Christina O.","Barton, Darlene A.","Underwood, Harvey N.","Jones, William O.","Baker, Frederick A.","Merritt, Shirley E.","Cross, Jason R.","Cooper, Judith O.","Holmes, Gretchen O.","Sharpe, Don H.","Morgan, Glenda O.","Hoyle, Scott O.","Allen, Pat L.","Rich, Michelle I.","Rich, Jessica I.","Grant, Evan R.","Proctor, Melinda R.","Diaz, Calvin I.","Graham, Eugene R.","Watkins, Vickie A.","Hinton, Luis I.","Marsh, Allan A.","Hewitt, Melanie E.","Branch, Marianne R.","Walton, Natalie A.","O'Brien, Caroline '.","Case, Arlene A.","Watts, Kyle A.","Christensen, Calvin H.","Parks, Gary A.","Hardin, Samantha A.","Lucas, Sara U.","Eason, Stacy A.","Davidson, Gladys A.","Whitehead, Mike H.","Rose, Lynne O.","Sparks, Faye P.","Moore, Diana O.","Pearson, Leon E.","Rodgers, Ethel O.","Graves, Steve R.","Scarborough, Alison C.","Sutton, Sherri U.","Sinclair, Patsy I.","Bowman, Kelly O.","Olsen, Stacy L.","Love, Curtis O.","McLean, Dana C.","Christian, Jennifer H.","Lamb, Brett A.","James, Brandon A.","Chandler, Keith H.","Stout, Joann T."];
+   return getRandomItems(items,count,{
+       id: guid(),
+       name: "Names",
+       data: { $color: "#2CB1BF" },
+       children : []
+   });
+};
 
-    //load json data
-    container.loadJSON(rootSunburstJSON);
-    //compute node positions and layout
-    container.compute();
-    container.onClick(container.root, {
-        Move: {
-            offsetY: -90
-        }
-    });
-    */
+var seedGeographics = function(count)
+{
+   var items = ["Canada","Toronto","Ontario","Montreal","Quebec","Germany","Berlin","USA","Cleveland","Ohio","New York","New York City","India","New Delhi","Haifa","Israel"];
+   return getRandomItems(items,count,{
+       id: guid(),
+       name: "Geographics",
+       data: { $color: "#AAD11E" },
+       children : []
+   });
+};
+var seedTopics = function(count)
+{
+   var items = ["Covenant","Abortion","Termination","Direct Teaching","IPG","Cluster Growth","Voting Rights","Prayers","Financial","Incorporation","Defense","Protection","Iran Diaspora"];
+   return getRandomItems(items,count,{
+       id: guid(),
+       name: "Topics",
+       data: { $color: "#E5D27F" },
+       children : []
+   });
+}
 
-
-var bursts = {};
-
-
-var sb = new $jit.Sunburst({
-        injectInto: "foobar",
-
-        levelDistance: 40,
-        Node: {
-          overridable: true,
-          type: 'gradient-multipie'
-        },
-        Label: {
-          type: 'Native'
-        },
-        NodeStyles: {
-          enable: true,
-          type: 'Native',
-          stylesClick: {
-            'color': '#33dddd'
-          },
-          stylesHover: {
-            'color': '#dd3333'
-          }
-        },
-        clearCanvas: false  
-    });
-
-//load JSON data.
-sb.loadJSON(rootSunburstJSON.data.sunburst);
-sb.compute();
-sb.refresh();
-
+getRandomItems = function(items,count, ret)
+{
+    for(var i = 0; i < count; i++)
+    {
+        ret.children.push(
+            {
+                id: guid(),
+                name: items[Math.floor(Math.random()*items.length)],
+                data: {},
+                children: []
+            });
+    }
+    return ret;
+}
+guid = function() 
+{
+    var S4 = function() {
+       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    };
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 }
