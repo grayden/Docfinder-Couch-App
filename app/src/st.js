@@ -1,22 +1,8 @@
 var labelType, useGradients, nativeTextSupport, animate;
-
-(function() {
-  var ua = navigator.userAgent,
-      iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i),
-      typeOfCanvas = typeof HTMLCanvasElement,
-      nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'),
-      textSupport = nativeCanvasSupport 
-        && (typeof document.createElement('canvas').getContext('2d').fillText == 'function');
-  //I'm setting this based on the fact that ExCanvas provides text support for IE
-  //and that as of today iPhone/iPad current text support is lame
-  labelType = (!nativeCanvasSupport || (textSupport && !iStuff))? 'Native' : 'HTML';
-  nativeTextSupport = labelType == 'Native';
-  useGradients = nativeCanvasSupport;
-  animate = !(iStuff || !nativeCanvasSupport);
-})();
+var id = 'infovis';
 
 var Log = {
-  elem: false,
+  elem: true,
   write: function(text){
     if (!this.elem) 
       this.elem = document.getElementById('log');
@@ -28,16 +14,16 @@ var Log = {
 
 function init() {
     //init data
-    var json = {
-      'id': 'root',
-      'name': 'root',
+    var rootSunburstJSON = {
+      'id': 'sb0',
+      'name': '',
       'data': {
-          //'$type': 'none'
+          '$type': 'none'
       },
       'children':[
         {
-            'id':'pie10',
-            'name': 'pie1',
+            'id':'sb1',
+            'name': '',
             'data': {
                 '$angularWidth': 20,
                 '$color': '#f55'
@@ -48,20 +34,67 @@ function init() {
       ]
     };
 
-    var jsonpie = {
+    var sunburstJSON = {
       'id': 'root',
-      'name': 'RGraph based Pie Chart',
+      'name': 'root',
       'data': {
-          '$type': 'none'
+          '$type': 'none',
+          'sunburst':
+                       {
+                           id:"Cars",
+                           name: "cars",
+                           data: {
+                               "$angularWidth": 200,
+                               "$color": "#FAFAFA"
+                               },
+                           children: [
+                                {
+                                   id:"2-door",
+                                   name: "2-door",
+                                   data: {
+                                       "$angularWidth": 50,
+                                       "$color": "#BABBBB"
+                                       },
+                                   children: [
+                                       {
+                                       id:"farrariracecar",
+                                       name: "Farrari race car",
+                                       data: {
+                                           "$angularWidth": 50,
+                                           "$color": "#BABBBB"
+                                           },
+                                       children: []
+                                       },
+                                       {
+                                       id:"Corvette",
+                                       name: "Corvette",
+                                       data: {
+                                           "$angularWidth": 50,
+                                           "$color": "#BABBBB"
+                                           },
+                                       children: []
+                                       }
+                                   ]
+                               },
+                               {
+                                   data: {
+                                       "$angularWidth": 50,
+                                       "$color": "#CACCCC"
+                                       },
+                                   id:"Vans",
+                                   name: "Vans"                                              
+                               }
+                            ]
+                       }
       },
       'children':[
         {
-            'id':'pie2',
-            'name': 'pie2',
+            'id':'sb2',
+            'name': '',
             'data': {
                 '$angularWidth': 40,
                 '$color': '#77f',
-                        'foo':
+                'sunburst':
                        {
                            id:"Gender",
                            name: "Gender",
@@ -95,114 +128,24 @@ function init() {
     };
     //end
     
-    //init pie
-    var pie = new $jit.RGraph({
-        'injectInto': 'infovis',
-        //Add node/edge styles and set
-        //overridable=true if you want your
-        //styles to be individually overriden
-        Node: {
-            'overridable': true,
-             'type':'shortnodepie'
-        },
-        Edge: {
-            'type':'none'
-        },
-        //Parent-children distance
+    var container = new $jit.RGraph({
+        'injectInto': id,
         levelDistance: 15,
-        //Don't create labels for this visualization
         withLabels: false,
-        //Don't clear the canvas when plotting
         clearCanvas: false
     });
     //load graph.
-    pie.loadJSON(jsonpie);
-    pie.compute();
+    container.loadJSON(rootSunburstJSON);
+    container.compute();
     //end
     
-    //init nodetypes
-    //Here we implement custom node rendering types for the RGraph
-    //Using this feature requires some javascript and canvas experience.
-    $jit.RGraph.Plot.NodeTypes.implement({
-        //This node type is used for plotting pie-chart slices as nodes
-        'shortnodepie': {
-          'render': function(node, canvas) {
-              console.log(node.data);
-              if (node.data.foo)
-                  {
-                      
-                      createsb(pie.canvas,node.data.foo);
-                  }
-              
-              return;
-            var ldist = this.config.levelDistance;
-            var span = node.angleSpan, begin = span.begin, end = span.end;
-            var polarNode = node.pos.getp(true);
-            var polar = new $jit.Polar(polarNode.rho, begin);
-            var p1coord = polar.getc(true);
-            
-            polar.theta = end;
-            var p2coord = polar.getc(true);
-            
-            polar.rho += ldist;
-            var p3coord = polar.getc(true);
-            
-            polar.theta = begin;
-            var p4coord = polar.getc(true);
-            
-            
-            var ctx = canvas.getCtx();
-            ctx.beginPath();
-            ctx.moveTo(p1coord.x, p1coord.y);
-            ctx.lineTo(p4coord.x, p4coord.y);
-            ctx.moveTo(0, 0);
-            ctx.arc(0, 0, polarNode.rho, begin, end, false);
-
-            ctx.moveTo(p2coord.x, p2coord.y);
-            ctx.lineTo(p3coord.x, p3coord.y);
-            ctx.moveTo(0, 0);
-            ctx.arc(0, 0, polarNode.rho + ldist, end, begin, true);
-            
-            ctx.fill();
-          }
-        }
-    });
-    
-    $jit.ST.Plot.NodeTypes.implement({
-        //Create a new node type that renders an entire RGraph visualization
-        'piechart': {
-          'render': function(node, canvas, animating) {
-            var ctx = canvas.getCtx(), pos = node.pos.getc(true);
-            ctx.save();
-            ctx.translate(pos.x, pos.y);
-            pie.plot();
-            ctx.restore();
-          }
-        }
-    });
-    $jit.ST.Plot.NodeTypes.implement({
-        //Create a new node type that renders an entire RGraph visualization
-        'sunburst': {
-          'render': function(node, canvas, animating) {
-              console.log('SB!');
-            var ctx = canvas.getCtx(), pos = node.pos.getc(true);
-            ctx.save();
-            ctx.translate(pos.x, pos.y);
-            pie.plot();
-            ctx.restore();
-          }
-        }
-    });
-    //end
-    
-
     //init st
-    var st = new $jit.ST({
-        useCanvas: pie.canvas,
+    var tree = new $jit.ST({
+        useCanvas: container.canvas,
         orientation: 'bottom',
         //Add node/edge styles
         Node: {
-           type: 'piechart',
+           type: 'sb',
            width: 60,
            height: 60
         },
@@ -211,43 +154,30 @@ function init() {
             type: 'quadratic:begin'
         },
         //Parent-children distance
-        levelDistance: 60,
+        levelDistance: 200
 
-        //Add styles to node labels on label creation
-        onCreateLabel: function(domElement, node){
-            //add some styles to the node label
-            var style = domElement.style;
-            domElement.id = node.id;
-            style.color = '#fff';
-            style.fontSize = '0.8em';
-            style.textAlign = 'center';
-            style.width = "60px";
-            style.height = "24px";
-            style.paddingTop = "22px";
-            style.cursor = 'pointer';
-            domElement.innerHTML = node.name;
-            domElement.onclick = function() {
-              st.onClick(node.id, {
-                    Move: {
-                        offsetY: -90
-                    }
-                });  
-            };
-        }
     });
     //load json data
-    st.loadJSON(json);
+    tree.loadJSON(rootSunburstJSON);
     //compute node positions and layout
-    st.compute();
+    tree.compute();
     //optional: make a translation of the tree
-    st.geom.translate(new $jit.Complex(0, 200), "start");
+    tree.geom.translate(new $jit.Complex(0, 200), "start");
     //Emulate a click on the root node.
-    st.onClick(st.root, {
+    tree.onClick(tree.root, {
         Move: {
             offsetY: -90
         }
     });
-    
+
+    $jit.ST.Plot.NodeTypes.implement({  
+            'sb': {  
+                    'render': function(node, canvas) {
+                        console.log(node.data.toSource());
+                        console.log('render sb');
+                    }
+            }
+    });
     
     
     
@@ -260,7 +190,7 @@ function createsb(c,data)
     //return;
     var sb = new $jit.Sunburst({
         useCanvas: c,
-        levelDistance: 50,
+        levelDistance: 40,
         Node: {
           overridable: true,
           type: 'gradient-multipie'
@@ -278,19 +208,12 @@ function createsb(c,data)
             'color': '#dd3333'
           }
         },
-        //Add tooltips
-        Tips: {
-          enable: false,
-          onShow: function(tip, node) {
-          }
-        },
         //implement event handlers
         Events: {
-          enable: true,
+          enable: false,
           onClick: function(node) {
             if(!node) return;
-            console.log(node.toSource());
-            
+            // do something when you click on a sb
           }
         },
         clearCanvas: false  
@@ -305,3 +228,50 @@ function createsb(c,data)
     sb.refresh();
     
 }
+
+
+$jit.ST.Plot.NodeTypes.implement({  
+	'adv-rect': {  
+		'render': function(node, canvas) {  
+			var width = node.getData('width'),  
+				height = node.getData('height'),  
+				pos = this.getAlignedPos(node.pos.getc(true), width, height),  
+				posX = pos.x + width/2,
+				posY = pos.y + height/2,
+				radius = node.getCanvasStyle("radius"),
+				RoundRect = {
+					'render': function(type, pos, width, height, radius, canvas) {
+						var ctx = canvas.getCtx(),
+							x = pos.x - width/2,
+							y = pos.y - height/2;
+	
+						ctx.beginPath();  
+						ctx.moveTo(x,y+radius);  
+						ctx.lineTo(x,y+height-radius);  
+						ctx.quadraticCurveTo(x,y+height,x+radius,y+height);  
+						ctx.lineTo(x+width-radius,y+height);  
+						ctx.quadraticCurveTo(x+width,y+height,x+width,y+height-radius);  
+						ctx.lineTo(x+width,y+radius);  
+						ctx.quadraticCurveTo(x+width,y,x+width-radius,y);  
+						ctx.lineTo(x+radius,y);  
+						ctx.quadraticCurveTo(x,y,x,y+radius);  
+						ctx[type]();
+					}	
+				};
+
+			if (radius > 0) {
+				RoundRect.render('fill', {x: posX, y: posY}, width, height, radius, canvas);
+				RoundRect.render('stroke', {x: posX, y: posY}, width, height, radius, canvas);
+			} else {
+				this.nodeHelper.rectangle.render('fill', {x: posX, y: posY}, width, height, canvas);  
+				this.nodeHelper.rectangle.render('stroke', {x: posX, y: posY}, width, height, canvas);
+			}  
+		},
+		'contains': function(node, pos) {
+			var width = node.getData('width'),
+				height = node.getData('height'),
+				npos = this.getAlignedPos(node.pos.getc(true), width, height);
+			return this.nodeHelper.rectangle.contains({x:npos.x+width/2, y:npos.y+height/2}, pos, width, height);
+		}
+	}
+});
