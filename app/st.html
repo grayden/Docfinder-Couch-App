@@ -39,42 +39,7 @@ var  tax = {
                    "$color": "#FAFAFA"
                    },
                children: [
-                   {
-                       id:"2-door",
-                       name: "2-door",
-                       data: {
-                           "$angularWidth": 50,
-                           "$color": "#BABBBB"
-                           },
-                       children: [
-                           {
-                           id:"farrariracecar",
-                           name: "Farrari race car",
-                           data: {
-                               "$angularWidth": 50,
-                               "$color": "#BABBBB"
-                               },
-                           children: []
-                           },
-                           {
-                           id:"Corvette",
-                           name: "Corvette",
-                           data: {
-                               "$angularWidth": 50,
-                               "$color": "#BABBBB"
-                               },
-                           children: []
-                           }
-                       ]
-                   },
-                   {
-                       data: {
-                           "$angularWidth": 50,
-                           "$color": "#CACCCC"
-                           },
-                       id:"Vans",
-                       name: "Vans"                                              
-                   }
+                   
                 ]
            }
           ],
@@ -102,7 +67,10 @@ var  tax = {
     <body onload="init();">
        
         <div id="center-container">
-            <div id="infovis"></div>    
+            <div id="infovis">
+                <div id="foobar" style="position: absolute;left: 100px;height: 100px;width:200px;"></div>
+                
+            </div>    
         </div>
        <div id="log"></div>
     </body>
