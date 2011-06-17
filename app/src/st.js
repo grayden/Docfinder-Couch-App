@@ -7,7 +7,7 @@ var Log = {
     if (!this.elem) 
       this.elem = document.getElementById('log');
     this.elem.innerHTML = text;
-    this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
+    //this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
   }
 };
 
@@ -17,26 +17,6 @@ function init() {
     var rootSunburstJSON = {
       'id': 'sb0',
       'name': '',
-      'data': {
-          '$type': 'none'
-      },
-      'children':[
-        {
-            'id':'sb1',
-            'name': '',
-            'data': {
-                '$angularWidth': 20,
-                '$color': '#f55'
-            },
-            'children': []
-        }
-        
-      ]
-    };
-
-    var sunburstJSON = {
-      'id': 'root',
-      'name': 'root',
       'data': {
           '$type': 'none',
           'sunburst':
@@ -89,11 +69,11 @@ function init() {
       },
       'children':[
         {
-            'id':'sb2',
+            'id':'sb1',
             'name': '',
             'data': {
-                '$angularWidth': 40,
-                '$color': '#77f',
+                '$angularWidth': 20,
+                '$color': '#f55',
                 'sunburst':
                        {
                            id:"Gender",
@@ -124,115 +104,144 @@ function init() {
             },
             'children': []
         }
+        
       ]
     };
-    //end
-    
-    var container = new $jit.RGraph({
-        'injectInto': id,
-        levelDistance: 15,
-        withLabels: false,
-        clearCanvas: false
-    });
-    //load graph.
-    container.loadJSON(rootSunburstJSON);
-    container.compute();
-    //end
-    
-    //init st
-    var tree = new $jit.ST({
-        useCanvas: container.canvas,
-        orientation: 'bottom',
-        //Add node/edge styles
-        Node: {
-           type: 'sb',
-           width: 60,
-           height: 60
-        },
-        Edge: {
-            color: '#999',
-            type: 'quadratic:begin'
-        },
-        //Parent-children distance
-        levelDistance: 200
 
+
+
+    $jit.Hypertree.Plot.NodeTypes.implement({  
+            'sb': {  
+
+      'render': function(node, canvas) {
+        var nconfig = this.node,
+            dim = node.getData('dim'),
+            p = node.pos.getc();
+        dim = nconfig.transform? dim * (1 - p.squaredNorm()) : dim;
+        p.$scale(node.scale);
+/*
+        if (dim > 0.2) {
+          this.nodeHelper.circle.render('fill', p, dim, canvas);
+        }
+        */
+       /*
+                    bursts[node.data.id] = new $jit.Sunburst({
+                                                useCanvas: canvas,
+
+                                                levelDistance: 40,
+                                                Node: {
+                                                  overridable: true,
+                                                  type: 'gradient-multipie'
+                                                },
+                                                Label: {
+                                                  type: 'Native'
+                                                },
+                                                NodeStyles: {
+                                                  enable: true,
+                                                  type: 'Native',
+                                                  stylesClick: {
+                                                    'color': '#33dddd'
+                                                  },
+                                                  stylesHover: {
+                                                    'color': '#dd3333'
+                                                  }
+                                                },
+                                                clearCanvas: false  
+                                            });
+
+                        //load JSON data.
+                        bursts[node.data.id].loadJSON(node.data.sunburst);
+                        bursts[node.data.id].compute();
+                        bursts[node.data.id].refresh();
+                        */
+      },
+      'contains': function(node, pos) {
+        var dim = node.getData('dim'),
+            npos = node.pos.getc().$scale(node.scale);
+        return this.nodeHelper.circle.contains(npos, pos, dim);
+      },
+
+                    'Arender': function(node, canvas) {
+                        
+                        
+                        
+                    
+                    if (bursts[data.id] == undefined || true)
+                    {
+                        bursts[data.id] = new $jit.Sunburst({
+                                                useCanvas: canvas,
+
+                                                levelDistance: 40,
+                                                Node: {
+                                                  overridable: true,
+                                                  type: 'gradient-multipie'
+                                                },
+                                                Label: {
+                                                  type: 'Native'
+                                                },
+                                                NodeStyles: {
+                                                  enable: true,
+                                                  type: 'Native',
+                                                  stylesClick: {
+                                                    'color': '#33dddd'
+                                                  },
+                                                  stylesHover: {
+                                                    'color': '#dd3333'
+                                                  }
+                                                },
+                                                clearCanvas: false  
+                                            });
+
+                        //load JSON data.
+                        bursts[data.id].loadJSON(node.data.sunburst);
+                        bursts[data.id].compute();
+                        bursts[data.id].refresh();
+                    }
+                    
+                }
+                    
+                    
+            }
     });
+
+    var container = new $jit.Hypertree(
+    {
+        //useCanvas : container.canvas,
+        injectInto: id,
+        clickedNodeId: "",
+        clickedNodeName: "",
+        Node:
+        {
+           type: 'sb',
+           width: 100,
+           height: 100
+        },
+        onAfterPlotLine: function() {
+          
+        },
+        clearCanvas: true
+    
+    });
+
     //load json data
-    tree.loadJSON(rootSunburstJSON);
+    container.loadJSON(rootSunburstJSON);
     //compute node positions and layout
-    tree.compute();
-    //optional: make a translation of the tree
-    tree.geom.translate(new $jit.Complex(0, 200), "start");
-    //Emulate a click on the root node.
-    tree.onClick(tree.root, {
+    container.compute();
+    container.onClick(container.root, {
         Move: {
             offsetY: -90
         }
     });
-
-    $jit.ST.Plot.NodeTypes.implement({  
-            'sb': {  
-                    'render': function(node, canvas) {
-                        console.log(node.data.toSource());
-                        console.log('render sb');
-                    }
-            }
-    });
-    
-    
-    
-
-    //end
-}
-function createsb(c,data)
-{
-    //console.log(c);
-    //return;
-    var sb = new $jit.Sunburst({
-        useCanvas: c,
-        levelDistance: 40,
-        Node: {
-          overridable: true,
-          type: 'gradient-multipie'
-        },
-        Label: {
-          type: 'Native'
-        },
-        NodeStyles: {
-          enable: true,
-          type: 'Native',
-          stylesClick: {
-            'color': '#33dddd'
-          },
-          stylesHover: {
-            'color': '#dd3333'
-          }
-        },
-        //implement event handlers
-        Events: {
-          enable: false,
-          onClick: function(node) {
-            if(!node) return;
-            // do something when you click on a sb
-          }
-        },
-        clearCanvas: false  
-    });
-    
-    //load JSON data.
-    sb.loadJSON(data);
-    //compute positions and plot.
-    
-    //console.log(sb.fx.plot());
-    //sb.geom.translate(new $jit.Complex(0, 200), "start");
-    sb.refresh();
-    
 }
 
+var bursts = {};
 
-$jit.ST.Plot.NodeTypes.implement({  
+
+$jit.Hypertree.Plot.NodeTypes.implement({  
 	'adv-rect': {  
 		'render': function(node, canvas) {  
+                                                    console.log(this);
+                                                    return;
 			var width = node.getData('width'),  
 				height = node.getData('height'),  
 				pos = this.getAlignedPos(node.pos.getc(true), width, height),  
