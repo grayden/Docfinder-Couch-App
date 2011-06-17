@@ -9,187 +9,147 @@ TaxonomyCircle.prototype.data = {
     size : 120,
     taxonomy: []
 }
-TaxonomyCircle.prototype.draw = function(paper)
+TaxonomyCircle.prototype.draw = function(viz)
 {
-    if (paper != undefined) 
-        this.paper = paper;
-        
-    var self = this;
-    var texts = [];
-    
-    var tax = this.getWholeTaxonomy();
-    console.log(tax);
-    //var neighbourCount ;
-    var curDepth;
-    
-    var startAngle = 0;
-    var topNodesDrawn = 0;
-    var partition;
-    var circlePart = 360;
-    for (var i = tax.length - 1; i >= 0; i--)
-    {
-        if (tax[i].depth != curDepth)
-        {   
-            curDepth = tax[i].depth;
-            circlePart = tax[i].neighbours;    
-            
-            console.log('CN: ' + self.parentNeighbourCount(tax[i]));
-            neighbourCount = self.getRingDepth(curDepth).length;
-            if (topNodesDrawn == 0)
-            {
-                startAngle = 0;            
+    var json = {
+                "id":"372",
+                "name":"n1",
+                "data":{"height":0,"documents":[],"executors":[],"csystems":
+[],"acts":[]},
+                "children":[{
+                        "id":"374",
+                        "name":"n3",
+                        "data":{"$type":"RoundEdgeRectangleWithHT","height":0,"documents":
+['document1','document2','document3'],"executors":['executor1']},
+                        "children":[{
+                                "id":"704417904",
+                                "name":"n2",
+                                "data":{"height":0,"documents":[],"executors":[],"csystems":
+[],"acts":[]}
+                        }]
+                }]
+        }; 
+   var st = new $jit.ST({
+            injectInto: 'testbed',
+            duration: 0,
+            width: 1000, // arbitrary size
+            height: 1000, // arbitrary size
+            background: false,
+            orientation: 'top',
+            // orientation: 'left',
+            levelDistance: 25,
+            levelsToShow: 20,
+            constrained: false,
+            Node: {
+                height: 25,
+                width: 90,
+                color:'#fff',
+                lineWidth: 0,
+                align:'center',
+                type: 'rectangle',
+                overridable: true
+            },
+            Edge: {
+                type: 'bezier',
+                lineWidth: 2,
+                color:'#446',
+                overridable: true
+            },
+            onAfterCompute: function(){
+                var graph_nodes = st.graph.nodes;
+                var x, y;
+                /*
+                for ( var i in graph_nodes )
+                {
+                    x = graph_nodes[i].pos.x;
+                    y = graph_nodes[i].pos.y;
+                    if ( x < st_left )
+                        st_left = x;
+                    if ( x > st_right )
+                        st_right = x;
+                    if ( y < st_top )
+                        st_top = y;
+                    if ( y > st_bottom )
+                        st_bottom = y;
+                }
+                */
+                console.log( 'onAfterCompute: left=' + st_left +',right=' + st_right + ',top=' + st_top + ',bottom=' + st_bottom );
             }
-            else
-            {
-                startAngle = topNodesDrawn * (360 / 3);
-            }
-            if (curDepth == 1)
-            {
-                topNodesDrawn++;
-            }
-            else
-            {
-            }
-
-        }
-        var size = self.data.size - 50;
-        var partition = circlePart / tax[i].neighbours;
-        self.drawSection(tax[i].value, size + (40 * curDepth + 1), startAngle, partition);
-        //texts.push(self.drawText(size,startAngle,partition+startAngle, partition,tax[i].value));
-        
-        startAngle += partition;
-    }
-    
-    /*
-    for (var i = this.taxonomyDepth();i > 0; i--)
-    {
-        var d2 = this.getRingDepth(i);
-        var startAngle = 0;
-        $.each(d2,function(k,v)
-        {
-            var size = self.data.size;
-            var partition = 360 / d2.length;
-            self.drawSection(v.value, size, startAngle, partition);
-            var endAngle = partition+startAngle;
-            texts.push(self.drawText(size,startAngle,endAngle, partition,v.value));
-            startAngle += partition;
         });
+        st.loadJSON(json);
+        st.compute(); 
+    return;
+      var sb = new $jit.Sunburst({
+        useCanvas: viz.canvas,
+        //id container for the visualization
+        //Distance between levels
+        levelDistance: 50,
+        //Change node and edge styles such as
+        //color, width and dimensions.
+        Node: {
+          overridable: true,
+          type: 'gradient-multipie'
+        },
+        //Select canvas labels
+        //'HTML', 'SVG' and 'Native' are possible options
+        Label: {
+          type: 'Native'
+        },
+        //Change styles when hovering and clicking nodes
+        NodeStyles: {
+          enable: true,
+          type: 'Native',
+          stylesClick: {
+            'color': '#33dddd'
+          },
+          stylesHover: {
+            'color': '#dd3333'
+          }
+        },
+        //Add tooltips
+        Tips: {
+          enable: false,
+          onShow: function(tip, node) {
+          }
+        },
+        //implement event handlers
+        Events: {
+          enable: true,
+          onClick: function(node) {
+            if(!node) return;
+            console.log(node.toSource());
+            
+            sb.tips.hide();
+            //rotate
+            sb.rotate(node, animate? 'animate' : 'replot', {
+              duration: 1000,
+              transition: $jit.Trans.Quart.easeInOut
+            });
+          }
+        },
+        clearCanvas: false  
+    });
+    
+    //load JSON data.
+    sb.loadJSON(this.data.taxonomy);
+    //compute positions and plot.
+    
+    //console.log(sb.fx.plot());
+    //sb.geom.translate(new $jit.Complex(0, 200), "start");
+    sb.refresh();
+    //end
 
-        break;
-    }
-    */
-    $.each(texts,function(k,v){v.toFront();});
-    
-    
     this.isDrawn = true;
     
     
 }
-TaxonomyCircle.prototype.drawSection = function(txt,size,startAngle,partition)
-{
-    
-    var s  = this.sector(this.data.x, this.data.y,size, startAngle, partition + startAngle, 
-        {
-                stroke: "#222", 
-                "stroke-width": 1,
-                gradient: "90-#CACACA-#AAAACA"
-        });
-};
-TaxonomyCircle.prototype.drawText = function(size,startAngle,endAngle,partition,txt)
-{
-    var x1 = this.data.x + size * Math.cos(-startAngle * this.rad),
-        x2 = this.data.x + size * Math.cos(-endAngle * this.rad),
-        y1 = this.data.y + size * Math.sin(-startAngle * this.rad),
-        y2 = this.data.y + size * Math.sin(-endAngle * this.rad);
-            
-    tX = (x1 + x2) /2;
-    tY = (y1 + y2) /2;
-    var t = this.paper.text(tX, tY, txt);
-    t.attr({fill: "#FFF", "font-family": 'Arial', "font-size": "20px", "text-anchor":"middle"});
-    t.rotate((startAngle + partition )/ (2 + endAngle + partition));
-    return t;
-}
 
-TaxonomyCircle.prototype.sector = function(cx, cy, r, startAngle, endAngle, params) 
-{
-        var x1 = cx + r * Math.cos(-startAngle * this.rad),
-            x2 = cx + r * Math.cos(-endAngle * this.rad),
-            y1 = cy + r * Math.sin(-startAngle * this.rad),
-            y2 = cy + r * Math.sin(-endAngle * this.rad);
-        return this.paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle > 180), 0, x2, y2, "z"]).attr(params);
-}
 TaxonomyCircle.prototype.getKey = function(obj)
 {
     for(k in obj)
         return k;
 }
-TaxonomyCircle.prototype.taxonomyDepth = function()
-{
-    return this.getDepth(this.data.taxonomy, 2);
-}
-TaxonomyCircle.prototype.getWholeTaxonomy = function()
-{
-    return this.getFlattenedTaxonomy(this.data.taxonomy,1,[]);
-}
-TaxonomyCircle.prototype.parentNeighbourCount = function(item)
-{
-    return $(this.getRingDepth(item.depth)).grep(function(i){return i.value == item.value});
-}
-TaxonomyCircle.prototype.getRingDepth = function(depth)
-{
-    var flattened = this.getWholeTaxonomy();
-    return $.grep(flattened,function(item) {return (item.depth == parseInt(depth));});
-}
-TaxonomyCircle.prototype.getFlattenedTaxonomy = function(ar, depth, ret)
-{
-    var self = this;    
-    if (self.isObject(ar))
-    {
-        for(k in ar)
-        {
-            ret.push({depth: depth, value : k,neighbours: ar.length});
-            if (self.hasBranches(ar[k]))
-                ret = self.getFlattenedTaxonomy(ar[k],depth + 1,ret);
-        }
-        
-    }
-    else if (self.isArray(ar))
-    {
-        $.each(ar,function(k,v)
-        {
-            if (self.isObject(v))
-                ret = self.getFlattenedTaxonomy(v,depth,ret);
-            else
-                ret.push({depth: depth, value : v, neighbours: ar.length});
-        });
-    }    
-    return ret;
-}
-TaxonomyCircle.prototype.hasBranches = function(obj)
-{
-    var self = this;
-    
-    if (self.isObject(obj) || self.isArray(obj))
-            return true;
-    
-    return false;
-}
-TaxonomyCircle.prototype.getDepth = function(obj, depth)
-{
-    var self = this;    
-    $.each(obj,function(k,v)
-    {
-        $.each(v,function(l,w)
-        {
-            
-            if (self.isObject(w[0]))
-            {
-                return self.getDepth(w, depth++);
-            }
-        });
-    });
-    return depth;
-}
+
 TaxonomyCircle.prototype.drawn = function()
 {
     return this.isDrawn;

@@ -1,31 +1,9 @@
-describe("TaxonomyCircle" , function() {
-    var taxonomyCircle;
-    var viz;
-    var taxonomy;
-    beforeEach(function() {
-        taxonomyCircle = new TaxonomyCircle();
-        $("#testbed").empty();
-        /*
-        viz = new $jit.RGraph({  
-          injectInto: 'testbed',  
-          width: 1500,  
-          height: 900  
-        });
-        $jit.ST.Plot.NodeTypes.implement({
-            //Create a new node type that renders an entire RGraph visualization
-            'sunburst': {
-              'render': function(node, canvas, animating) {
-                  console.log('render-sb');
-                var ctx = canvas.getCtx(), pos = node.pos.getc(true);
-                ctx.save();
-                ctx.translate(pos.x, pos.y);
-                pie.plot();
-                ctx.restore();
-              }
-            }
-        });
-        */
-        taxonomy = {
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+var  tax = {
           children: [
            {
                id:"Gender",
@@ -103,26 +81,29 @@ describe("TaxonomyCircle" , function() {
             id: "MyTaxonomy",
             name: "My Taxonomy"
          };
-    });
-
-    it("should have a default x / y / size", function()
-    {
-        expect(taxonomyCircle.data.x).toBeDefined();
-        expect(taxonomyCircle.data.y).toBeDefined();
-        expect(taxonomyCircle.data.size).toBeDefined();
-    });
-    it("should be able to be drawn to paper", function()
-    {     
-        //taxonomyCircle.update(taxonomy);
-        //taxonomyCircle.draw(viz);
-        //expect(taxonomyCircle.drawn()).toBeTruthy();
+        </script>
         
-        taxonomyCircle2 = new TaxonomyCircle();
-        taxonomyCircle2.update(taxonomy);
-        taxonomyCircle2.draw(viz);
-        
-    });
-});
+        <script src="lib/jquery-1.6.1.min.js"></script>
 
-         
-     
+      <script type="text/javascript" src="lib/jit-yc.js"></script>
+
+      <script type="text/javascript" src="src/st.js"></script>
+      
+      
+      <style>
+        #infovis {
+            width:800px;
+            height: 400px;
+            background-color:#1a1a1a;
+        }
+
+      </style>
+    </head>
+    <body onload="init();">
+       
+        <div id="center-container">
+            <div id="infovis"></div>    
+        </div>
+       <div id="log"></div>
+    </body>
+</html>
