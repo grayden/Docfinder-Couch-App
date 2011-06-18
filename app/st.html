@@ -2,140 +2,44 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script>
- //init data
-    var rootSunburstJSON = {
-      'id': 'sb0',
-      'name': '',
-      'data': {
-          '$type': 'none',
-          'sunburst':
-                       {
-                           id:"948128",
-                           name: "948128",
-                           data: {
-                               "$color": "#FAFAFA"
-                               },
-                           children: [
-                                {
-                                   id:"Subjects",
-                                   name: "Subjects",
-                                   data: {
-                                       $color: "#BABBBB"
-                                       },
-                                   children: []
-                                 },
-                                {
-                                   id:"Geographics",
-                                   name: "Geographics",
-                                   data: {
-                                       $color: "#BABBBB"
-                                       },
-                                   children: [
-                                       {
-                                       id:"Canada",
-                                       name: "Canada",
-                                       data: {
-                                           "$color": "#BABBBB"
-                                           },
-                                       children: [
-                                           
-                                        {
-                                           id:"Toronto",
-                                           name: "Toronto",
-                                           data: {
-                                               "$color": "#BABBBB"
-                                               },
-                                           children: []
-                                       },
-                                       {
-                                           id:"Ontario",
-                                           name: "Ontario",
-                                           data: {
-                                               "$color": "#BABBBB"
-                                               },
-                                           children: []
-                                       }
-                                       ]
-                                       }
-                                       
-                                   ]
-                                }
-                           ]
-                            
-                       }
-      },
-      'children':[
-        {
-            'id':'sb1',
-            'name': '',
-            'data': {
-                '$angularWidth': 20,
-                '$color': '#f55',
-                'sunburst':
-                       {
-                           id:"Gender",
-                           name: "Gender",
-                           data: {
-                               "$angularWidth": 200,
-                               "$color": "#FAFAFA"
-                               },
-                           children: [
-                               {
-                                   data: {
-                                       "$angularWidth": 50,
-                                       "$color": "#BABBBB"
-                                       },
-                                   id:"male",
-                                   name: "Male"
-                               },
-                               {
-                                   data: {
-                                       "$angularWidth": 50,
-                                       "$color": "#CACCCC"
-                                       },
-                                   id:"fmale",
-                                   name: "Female"                                              
-                               }
-                            ]
-                       }
-            },
-            'children': []
-        }
-        
-      ]
-    };
-        </script>
-        
         <script src="lib/jquery-1.6.1.min.js"></script>
-
-      <script type="text/javascript" src="lib/jit-yc.js"></script>
-
-      <script type="text/javascript" src="src/st.js"></script>
-      
-      
+        <script src="lib/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="lib/jit-yc.js"></script>
+        <script type="text/javascript" src="lib/raphael-min.js"></script>
+        <script type="text/javascript" src="src/seeds.js"></script>
+        <script type="text/javascript" src="src/st.js"></script>
+        
       <style>
         *{ margin: 0 0; padding: 0 0;}
-        #infovis {
+        #container
+        {
+            background-color:#1a1a1a;
             width:100%;
             height: 100%;
-            background-color:#1a1a1a;
             position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        #vis {
+            position: relative;
+            z-index:10;
+            width: 100%;
+            height: 100%;
         }
         .sb
         {
-            height: 400px;
-            width: 400px;
+            overflow: auto;
+            height:250px;
+            width: 250px;
+            z-index: 100;
             position: absolute;
         }
       </style>
     </head>
     <body onload="init();">
-       
-        <div id="center-container">
-            <div id="infovis">                
-            </div>    
+        <div id="container">
+            <div id="vis"></div>    
+            <div style="position: absolute;z-index:5;top:0;left:0;width:100%;height:100%;" id="paper" ></div>
         </div>
-       <div id="log"></div>
     </body>
 </html>
