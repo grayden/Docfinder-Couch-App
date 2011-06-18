@@ -70,7 +70,7 @@ function initDraggable()
 var daisy = function()
 {
     paper = Raphael("paper", $("#paper").width(), $("#paper").height());
-    var root = createStarburst(seedWizardNumber(),
+    var root = createStarburstContainer(seedWizardNumber(),
     {
         enable: true,
         onClick: starburstOnClick
@@ -86,7 +86,7 @@ var starburstOnClick = function(node, eventInfo, e)
     if (node['_depth'] == 1)
     {
         //use reflection to pull in the see data
-        var sb = createStarburst(eval('seed'+node.name+'(5)'),
+        var sb = createStarburstContainer(eval('seed'+node.name+'(5)'),
         {
             enable: true,
             onClick: starburstOnClick
