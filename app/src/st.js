@@ -3,10 +3,10 @@ function init() {
     daisy();
 }
 
-
+//using Raphael for the background lines...
 var paper; 
 
-//keep track of the sunbursts:
+//keep track of the sunbursts on the canvas:
 var sunbursts = {};
 
 //keep track of the lines (paths)
@@ -20,10 +20,12 @@ var getPath = function(startCanvas, srcNode, endCanvas)
         startLineY = startCanvas.offset().top  + (startCanvas.height() / 2) + startPos.y;
         endLineX = endCanvas.offset().left + (endCanvas.width() / 2),
         endLineY = endCanvas.offset().top + (endCanvas.height() / 2);
-        
+    
+    // bezier curves would be a lot better here...
     return ["M",startLineX,startLineY,"L",endLineX,endLineY].join(",");
 
 }
+// redraw all the lines
 var drawPaths = function()
 {
     $.each(paths, function(k,v){
@@ -48,17 +50,15 @@ function initDraggable()
         stop: function()
         {
          drawPaths();
-         console.log(this);
-         
          $.each(sunbursts, function(k,v)
          {
              var data = v.json;
              $("#"+v.canvas.id).empty();
-             v = createsb(v.canvas.id,data,
-                {
-                    enable: true,
-                    onClick: starburstOnClick
-                });
+             createsb(v.canvas.id,data,
+             {
+                enable: true,
+                onClick: starburstOnClick
+             });
 
          });
          
@@ -80,12 +80,13 @@ var daisy = function()
     $("#"+root.canvas.id).css("top","20%");
    
 }
+// starburst helpers
 var starburstOnClick = function(node, eventInfo, e)
 {
     if (node['_depth'] == 1)
     {
-        console.log('seed'+node.name);
-        sb = createStarburst(eval('seed'+node.name+'(5)'),
+        //use reflection to pull in the see data
+        var sb = createStarburst(eval('seed'+node.name+'(5)'),
         {
             enable: true,
             onClick: starburstOnClick
@@ -95,7 +96,7 @@ var starburstOnClick = function(node, eventInfo, e)
         drawPaths();
     }    
 }
-var createStarburst = function(data,evt)
+var createStarburstContainer = function(data,evt)
 {
     if (evt === undefined) evt = {};
     var sbId = 'sb_'+data.id;
@@ -109,7 +110,6 @@ var createsb = function(div,data,evt)
 {
     var sb = new $jit.Sunburst({
             injectInto: div,
-
             levelDistance: 40,
             Node: {
               overridable: true,
@@ -121,7 +121,6 @@ var createsb = function(div,data,evt)
             },
             NodeStyles: {
               enable: true,
-              
               type: 'Native',
               stylesClick: {
                 'color': '#33dddd'
@@ -132,8 +131,6 @@ var createsb = function(div,data,evt)
             },
             clearCanvas: false  
         });
-
-    //load JSON data.
     sb.loadJSON(data);    
     sb.refresh();   
     return sb;
