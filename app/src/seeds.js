@@ -8,7 +8,7 @@ var seedWizardNumber = function()
            {id:guid(),name:"Related",data :{}, children:seedChildDocs()},
            {id:guid(),name:"Geographics",data: {}, children:[]},
            {id:guid(),name:"Topics",data: {}, children:[]},
-           {id:guid(),name:"Name",data: {}, children:[]}
+           {id:guid(),name:"Names",data: {}, children:[]}
        ]
     };
 
@@ -40,6 +40,25 @@ var seedGeographics = function(count)
        id: guid(),
        name: "Geographics",
        data: {$color: "#AAD11E"},
+       children : [
+            {
+                id: guid(),
+                name: "India",
+                data: {},
+                children: []
+            }           
+       ]
+   });
+};
+var seedIndia = function(count)
+{
+   var items = [];
+   for (var i = 0; i < 500; i++)
+           items.push(Math.floor(Math.random()*100000));
+   return getRandomItems(items,count,{
+       id: guid(),
+       name: "India",
+       data: {$color: "#CC5539"},
        children : []
    });
 };
