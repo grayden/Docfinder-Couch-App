@@ -1,12 +1,15 @@
 var id = 'vis';
-var graph;
 function init() {    
     daisy();
 }
-var root;
-var sb;
+
+
 var paper; 
 
+//keep track of the sunbursts:
+var sunbursts = {};
+
+//keep track of the lines (paths)
 var paths = [];
 var getPath = function(startCanvas, srcNode, endCanvas)
 {
@@ -27,6 +30,8 @@ var drawPaths = function()
        paper.path(getPath($("#"+v[0]),v[1],$("#"+v[2]))).attr({stroke:"#FFF", "stroke-width": 2});
     });
 }
+
+
 function initDraggable()
 {
     $(".sb").draggable({
@@ -43,24 +48,34 @@ function initDraggable()
         stop: function()
         {
          drawPaths();
-         var data = root.json;
-         $("#"+root.canvas.id).empty();
-         root = createsb(root.canvas.id,data,
-            {
-                enable: true,
-                onClick: starburstOnClick
-            });
+         console.log(this);
+         
+         $.each(sunbursts, function(k,v)
+         {
+             var data = v.json;
+             $("#"+v.canvas.id).empty();
+             v = createsb(v.canvas.id,data,
+                {
+                    enable: true,
+                    onClick: starburstOnClick
+                });
+
+         });
+         
         }
     });
 }
+
+// initialize the daisy:
 var daisy = function()
 {
     paper = Raphael("paper", $("#paper").width(), $("#paper").height());
-    root = createStarburst(seedWizardNumber(),
+    var root = createStarburst(seedWizardNumber(),
     {
         enable: true,
         onClick: starburstOnClick
     });
+    sunbursts[root.canvas.id] = root;
     $("#"+root.canvas.id).css("left","40%");
     $("#"+root.canvas.id).css("top","20%");
    
@@ -75,6 +90,7 @@ var starburstOnClick = function(node, eventInfo, e)
             enable: true,
             onClick: starburstOnClick
         });
+        sunbursts[sb.canvas.id] = sb;
         paths.push([e.target.id,node,sb.canvas.id]);
         drawPaths();
     }    
