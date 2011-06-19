@@ -1,96 +1,128 @@
 describe("TaxonomyCircle" , function() {
     var taxonomyCircle;
-    var paper;
+    var viz;
     var taxonomy;
     beforeEach(function() {
         taxonomyCircle = new TaxonomyCircle();
         $("#testbed").empty();
-        paper = Raphael($("#testbed").get(0), 450, 450);
-        
-        taxonomy = 
-          [
-           {"Gender": ["Male", "Female"]}, 
-           {"Cars": 
-                    [
-                     {"2 door" : ["sports car", "Fiat 500"]} , 
-                     {"Van"    : ["Toyota thing", "VW Bus"]}
-                    ]
+        /*
+        viz = new $jit.RGraph({  
+          injectInto: 'testbed',  
+          width: 1500,  
+          height: 900  
+        });
+        $jit.ST.Plot.NodeTypes.implement({
+            //Create a new node type that renders an entire RGraph visualization
+            'sunburst': {
+              'render': function(node, canvas, animating) {
+                  console.log('render-sb');
+                var ctx = canvas.getCtx(), pos = node.pos.getc(true);
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                pie.plot();
+                ctx.restore();
+              }
+            }
+        });
+        */
+        taxonomy = {
+          children: [
+           {
+               id:"Gender",
+               name: "Gender",
+               data: {
+                   "$angularWidth": 200,
+                   "$color": "#FAFAFA"
+                   },
+               children: [
+                   {
+                       data: {
+                           "$angularWidth": 50,
+                           "$color": "#BABBBB"
+                           },
+                       id:"male",
+                       name: "Male"
+                   },
+                   {
+                       data: {
+                           "$angularWidth": 50,
+                           "$color": "#CACCCC"
+                           },
+                       id:"fmale",
+                       name: "Female"                                              
+                   }
+                ]
            },
-           {"Countries":
-                   [
-                    {"Canada" : [ 
-                                 {"Ontario": ["Toronto"]},
-                                 {"Quebec": ["Sherbrooke","Montreal"]}
-                                ]
-                    }
-                   ]
+           {
+               id:"Cars",
+               name: "Cars",
+               data: {
+                   "$angularWidth": 10,
+                   "$color": "#FAFAFA"
+                   },
+               children: [
+                   {
+                       id:"2-door",
+                       name: "2-door",
+                       data: {
+                           "$angularWidth": 50,
+                           "$color": "#BABBBB"
+                           },
+                       children: [
+                           {
+                           id:"farrariracecar",
+                           name: "Farrari race car",
+                           data: {
+                               "$angularWidth": 50,
+                               "$color": "#BABBBB"
+                               },
+                           children: []
+                           },
+                           {
+                           id:"Corvette",
+                           name: "Corvette",
+                           data: {
+                               "$angularWidth": 50,
+                               "$color": "#BABBBB"
+                               },
+                           children: []
+                           }
+                       ]
+                   },
+                   {
+                       data: {
+                           "$angularWidth": 50,
+                           "$color": "#CACCCC"
+                           },
+                       id:"Vans",
+                       name: "Vans"                                              
+                   }
+                ]
            }
-          ];
-          taxonomy = 
-          [
-           {"Gender": ["Male", "Female"]}, 
-           {"Cars": 
-                    [
-                    'a' 
-                    ]
-           }
-          ];
+          ],
+            id: "MyTaxonomy",
+            name: "My Taxonomy"
+         };
+    });
 
-    });
-    it("should be able to be drawn to paper", function()
-    {     
-        taxonomyCircle.update(taxonomy);
-        taxonomyCircle.draw(paper);
-        expect(taxonomyCircle.drawn()).toBeTruthy();
-    });
-    return;
-    it ("should handle taxonomies recursively",function()
-    {
-        taxonomyCircle.update({"Cars":[{'2 door':["sports car", "Fiat 500"]}, {'Van':["Toyota thing", "VW Bus"]}]});
-        expect(taxonomyCircle.getRingDepth(3)).toEqual([
-         { depth : 3, value : 'sports car' }, 
-         { depth : 3, value : 'Fiat 500' }, 
-         { depth : 3, value : 'Toyota thing' }, 
-         { depth : 3, value : 'VW Bus' }     
-        ]);
-    });
-    it ("should get flattened taxonomies recursively",function()
-    {
-        var ar = {"Cars":[
-                    {'2 door':["sports car", "Fiat 500"]}, 
-                    {"Van":["Toyota thing", "VW Bus"]}
-                  ]};
-        expect(taxonomyCircle.getFlattenedTaxonomy(ar, 1, [])).toEqual(
-        [{ depth : 1, value : 'Cars' }, 
-         { depth : 2, value : '2 door' }, 
-         { depth : 3, value : 'sports car' }, 
-         { depth : 3, value : 'Fiat 500' }, 
-         { depth : 2, value : 'Van' }, 
-         { depth : 3, value : 'Toyota thing' }, 
-         { depth : 3, value : 'VW Bus' } 
-        ]);
-        
-    });
-    it("should get taxonomy depth", function() 
-    {
-        taxonomyCircle.update(taxonomy);
-        expect(taxonomyCircle.taxonomyDepth()).toEqual(4);
-    });
     it("should have a default x / y / size", function()
     {
         expect(taxonomyCircle.data.x).toBeDefined();
         expect(taxonomyCircle.data.y).toBeDefined();
         expect(taxonomyCircle.data.size).toBeDefined();
     });
-     
-     
-    it("should accept taxonomy data", function()
-    {
-          
-        taxonomyCircle.update(taxonomy);
-        taxonomyCircle.draw(paper);
+    it("should be able to be drawn to paper", function()
+    {     
+        //taxonomyCircle.update(taxonomy);
+        //taxonomyCircle.draw(viz);
+        //expect(taxonomyCircle.drawn()).toBeTruthy();
         
-        taxonomyCircle.draw();
+        taxonomyCircle2 = new TaxonomyCircle();
+        taxonomyCircle2.update(taxonomy);
+        taxonomyCircle2.draw(viz);
         
-    });    
+    });
 });
+
+         
+     

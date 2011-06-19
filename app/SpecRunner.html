@@ -10,7 +10,7 @@
 
   <script src="lib/jquery-1.6.1.min.js"></script>
 
-  <script type="text/javascript" src="lib/raphael-min.js"></script>
+  <script type="text/javascript" src="lib/jit-yc.js"></script>
 
   <!-- include source files here... -->
   <script type="text/javascript" src="src/TaxonomyCircle.js"></script>
@@ -21,8 +21,16 @@
 
 </head>
 <body>
-    <div id="testbed">
-    </div>
+<style>
+    #testbed
+    {
+        position:relative;
+        margin:auto;
+        overflow:hidden;
+    }
+</style>
+<div id="testbed">  
+</div>
 <script type="text/javascript">
   jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
   jasmine.getEnv().execute();
