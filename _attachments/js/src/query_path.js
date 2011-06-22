@@ -1,4 +1,4 @@
-function path_p()
+function path_proto()
 {
     this.current_step = -1;
     this.start_type = "";
@@ -7,14 +7,13 @@ function path_p()
     this.start_property = "";
     this.steps = [];
     
-    this.bay1 = [];
-    this.bay2 = [];
+    this.bay = [];
     this.launch = [];
 
     this.query_tool;
 }
 
-path_p.prototype.set_directions = function(directions_object)
+path_proto.prototype.set_directions = function(directions_object)
 {
     this.start_type = directions_object.start_type;
     this.end_type = directions_object.end_type;
@@ -23,32 +22,70 @@ path_p.prototype.set_directions = function(directions_object)
     this.steps = directions_object.steps;
 }
 
-path_p.prototype.find_next_step = function()
+path_proto.prototype.go_to_next_step = function()
 {
     this.current_step++;
     return this.steps[this.current_step];
 }
 
-path_p.prototype.query_path = function()
+path_proto.prototype.query_path = function()
 {
-    var view = this.query_tool.determine_needed_view(this.start_type, this.start_property);
-    var specs = 'key=["' + this.start_value + '","' + this.start_type + '"]';
-    this.query_tool.couch_query(view, specs)
+    var doc_type = this.doc_type();
+    var doc_property = this.doc_property();
+    var doc_value = this.doc_value();
+    
+    var view = this.query_tool.determine_needed_view(doc_type, doc_property);
+    var specs = 'key=["' + doc_value + '","' + doc_type + '"]';
+    this.query_tool.couch_query(view, specs);
+    this.go_to_next_step();
+    
 }
 
-path_p.prototype.add_query_tool = function(tool)
+path_proto.prototype.doc_type = function()
+{
+    return this.start_type;
+    
+    return (this.steps[this.current_step][2])?(this.steps[this.current_step][2]):this.start_type;
+}
+
+path_proto.prototype.doc_property = function()
+{
+    return this.start_property;
+    
+    return (this.steps[this.current_step][1])?(this.steps[this.current_step][1]):this.start_property;
+}
+
+path_proto.prototype.doc_value = function()
+{
+    return this.start_value;
+    
+    // Only allows a path down the first matched value
+    return (this.bay[0].value[this.doc_property()])?(this.bay[0].value[this.doc_property()]):this.start_value;
+}
+
+path_proto.prototype.add_query_tool = function(tool)
 {
     this.query_tool = tool;
 }
 
-function query_p()
+path_proto.prototype.save_db_retrieved = function (obj)
+{
+    if (this.bay[0])
+        this.launch.push(this.bay);
+
+    this.bay = obj.rows;
+}
+
+function query_proto()
 {
     this.port = "5984";
     this.site = "127.0.0.1";
-    this.db_uri = "/docfinder/_design/docs/_view";    
+    this.db_uri = "/docfinder/_design/docs/_view";
+    
+    this.path_tool;
 }
 
-query_p.prototype.couch_query = function(view, specs)
+query_proto.prototype.couch_query = function(view, specs)
 {
     var query = this.db_uri + "/" + view + "?" + specs;
     console.log(query);
@@ -57,7 +94,9 @@ query_p.prototype.couch_query = function(view, specs)
         {
             var obj = JSON.parse(data);
             console.log(data);
-            console.log(test_object_has_rows(obj));
+
+            // Make reference better
+            path.save_db_retrieved(obj);
         }
     );
 }
@@ -65,7 +104,7 @@ query_p.prototype.couch_query = function(view, specs)
 // The idea of this method is that it will determine what view is needed for the immediate query
 // I'm hoping this method can be a bit more "magical"
 
-query_p.prototype.determine_needed_view = function (type, property)
+query_proto.prototype.determine_needed_view = function (type, property)
 {
     if (type == "country" && (property == "name" || property == "country.name"))
         return "use_country_name";
@@ -82,9 +121,13 @@ function test_object_has_rows(to_test)
     return false;
 }
 
+query_proto.prototype.add_path_tool = function(path_tool)
+{
+    this.path_tool = path_tool;
+}
 
-var path = new path_p;
-var query = new query_p;
+var path = new path_proto();
+var query = new query_proto();
 
 // V2 of guiding path object
 var test_path = {
@@ -100,6 +143,7 @@ var test_path = {
 
 path.set_directions(test_path);
 path.add_query_tool(query);
+query.add_path_tool(path);
 path.query_path();
 
 /*
