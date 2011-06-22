@@ -1,6 +1,5 @@
 function path_p()
 {
-    // path
     this.current_step = -1;
     this.start_type = "";
     this.end_type = "";
@@ -8,19 +7,13 @@ function path_p()
     this.start_property = "";
     this.steps = [];
     
-    // path
     this.bay1 = [];
     this.bay2 = [];
     this.launch = [];
 
-    // query
-    this.port = "5984";
-    this.site = "127.0.0.1";
-    this.db_uri = "/docfinder/_design/docs/_view";
-
+    this.query_tool;
 }
 
-// path
 path_p.prototype.set_directions = function(directions_object)
 {
     this.start_type = directions_object.start_type;
@@ -30,23 +23,32 @@ path_p.prototype.set_directions = function(directions_object)
     this.steps = directions_object.steps;
 }
 
-// path
 path_p.prototype.find_next_step = function()
 {
     this.current_step++;
     return this.steps[this.current_step];
 }
 
-// path
 path_p.prototype.query_path = function()
 {
-    var view = this.determine_needed_view(this.start_type, this.start_property);
+    var view = this.query_tool.determine_needed_view(this.start_type, this.start_property);
     var specs = 'key=["' + this.start_value + '","' + this.start_type + '"]';
-    this.couch_query(view, specs)
+    this.query_tool.couch_query(view, specs)
 }
 
-// query
-path_p.prototype.couch_query = function(view, specs)
+path_p.prototype.add_query_tool = function(tool)
+{
+    this.query_tool = tool;
+}
+
+function query_p()
+{
+    this.port = "5984";
+    this.site = "127.0.0.1";
+    this.db_uri = "/docfinder/_design/docs/_view";    
+}
+
+query_p.prototype.couch_query = function(view, specs)
 {
     var query = this.db_uri + "/" + view + "?" + specs;
     console.log(query);
@@ -54,33 +56,16 @@ path_p.prototype.couch_query = function(view, specs)
         function(data)
         {
             var obj = JSON.parse(data);
-            console.log(path.test_query_got_rows(obj));
+            console.log(data);
+            console.log(test_object_has_rows(obj));
         }
     );
-}
-
-// query
-path_p.prototype.test_starting_point = function()
-{
-    var view = this.determine_needed_view(this.start_type, this.start_property);
-    
-    return this.test_query_got_rows(
-    this.couch_query(view,'key=["' + this.start_value +'","' + this.start_type + '"]')
-    );
-}
-
-// query
-path_p.prototype.save_object = function (view, specs)
-{
-    var count = this.launch.push(path.couch_query(view, specs));
-    return this.launch[count -1];
 }
 
 // The idea of this method is that it will determine what view is needed for the immediate query
 // I'm hoping this method can be a bit more "magical"
 
-// query
-path_p.prototype.determine_needed_view = function (type, property)
+query_p.prototype.determine_needed_view = function (type, property)
 {
     if (type == "country" && (property == "name" || property == "country.name"))
         return "use_country_name";
@@ -91,8 +76,7 @@ path_p.prototype.determine_needed_view = function (type, property)
     return "no_view";
 }
 
-// query
-path_p.prototype.test_query_got_rows = function(to_test)
+function test_object_has_rows(to_test)
 {
     if (to_test.rows && to_test.rows.length > 0) {return true;}
     return false;
@@ -100,6 +84,7 @@ path_p.prototype.test_query_got_rows = function(to_test)
 
 
 var path = new path_p;
+var query = new query_p;
 
 // V2 of guiding path object
 var test_path = {
@@ -112,7 +97,9 @@ var test_path = {
         ["city", "name", "dockey", "city.name"]
         ]
     };
+
 path.set_directions(test_path);
+path.add_query_tool(query);
 path.query_path();
 
 /*
