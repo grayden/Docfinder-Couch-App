@@ -46,9 +46,19 @@ path_p.prototype.test_query_got_rows = function(to_test)
     return false;
 }
 
+// The idea of this method is that it will determine what view is needed for the immediate query
+// I'm hoping this method can be a bit more "magical"
+path_p.prototype.determine_needed_view = function (type, property)
+{
+    if (type == "country" && (property == "name" || property == "country.name"))
+        return "use_country_name";
+}
+
 path_p.prototype.test_starting_point = function()
 {
-    return this.test_query_got_rows(this.couch_query("use_country_name",'key=["' + this.starting_key +'","' + this.starting_property + '"]'));
+    return this.test_query_got_rows(
+    this.couch_query(this.determine_needed_view(this.starting_type, this.starting_property),'key=["' + this.starting_key +'","' + this.starting_property + '"]')
+    );
 }
 
 path_p.prototype.console_show_couch_query = function (view, specs)
@@ -59,6 +69,8 @@ path_p.prototype.console_show_couch_query = function (view, specs)
 var path = new path_p;
 
 var test_schema_array = [
+    // Read like this: Country can link to city because it has a country.code 
+    // which matches the code of country
     {country: [["city", "country.code", "code"]]},
     {city: [["country", "code", "country.code"], ["dockey", "city.name", "name"]]},
     {dockey: [["city", "name", "city.name"]]}
