@@ -1,5 +1,6 @@
 function path_p()
 {
+    // path
     this.current_step = -1;
     this.start_type = "";
     this.end_type = "";
@@ -7,16 +8,19 @@ function path_p()
     this.start_property = "";
     this.steps = [];
     
-    this.port = "5984";
-    this.site = "127.0.0.1";
-    this.db_uri = "docfinder/_design/docs/_view";
-
+    // path
     this.bay1 = [];
     this.bay2 = [];
     this.launch = [];
 
+    // query
+    this.port = "5984";
+    this.site = "127.0.0.1";
+    this.db_uri = "/docfinder/_design/docs/_view";
+
 }
 
+// path
 path_p.prototype.set_directions = function(directions_object)
 {
     this.start_type = directions_object.start_type;
@@ -26,27 +30,36 @@ path_p.prototype.set_directions = function(directions_object)
     this.steps = directions_object.steps;
 }
 
-path_p.prototype.next_step = function()
+// path
+path_p.prototype.find_next_step = function()
 {
     this.current_step++;
     return this.steps[this.current_step];
 }
 
-path_p.prototype.console_next_step = function()
+// path
+path_p.prototype.query_path = function()
 {
-    console.log(this.next_step());
+    var view = this.determine_needed_view(this.start_type, this.start_property);
+    var specs = 'key=["' + this.start_value + '","' + this.start_type + '"]';
+    this.couch_query(view, specs)
 }
 
+// query
 path_p.prototype.couch_query = function(view, specs)
 {
-    console.log("/" + this.db_uri + "/" + view + "?" + specs);
-    return JSON.parse($.ajax({
-        type: "GET",
-        url: "/" + this.db_uri + "/" + view + "?" + specs,
-        async: false
-    }).responseText);
+    var query = this.db_uri + "/" + view + "?" + specs;
+    console.log(query);
+    $.get(query,
+        function(data)
+        {
+            var obj = JSON.parse(data);
+            console.log(path.test_query_got_rows(obj));
+        }
+    );
 }
 
+// query
 path_p.prototype.test_starting_point = function()
 {
     var view = this.determine_needed_view(this.start_type, this.start_property);
@@ -56,6 +69,7 @@ path_p.prototype.test_starting_point = function()
     );
 }
 
+// query
 path_p.prototype.save_object = function (view, specs)
 {
     var count = this.launch.push(path.couch_query(view, specs));
@@ -64,6 +78,8 @@ path_p.prototype.save_object = function (view, specs)
 
 // The idea of this method is that it will determine what view is needed for the immediate query
 // I'm hoping this method can be a bit more "magical"
+
+// query
 path_p.prototype.determine_needed_view = function (type, property)
 {
     if (type == "country" && (property == "name" || property == "country.name"))
@@ -75,6 +91,7 @@ path_p.prototype.determine_needed_view = function (type, property)
     return "no_view";
 }
 
+// query
 path_p.prototype.test_query_got_rows = function(to_test)
 {
     if (to_test.rows && to_test.rows.length > 0) {return true;}
@@ -95,9 +112,8 @@ var test_path = {
         ["city", "name", "dockey", "city.name"]
         ]
     };
-    
 path.set_directions(test_path);
-console.log(path.test_starting_point());
+path.query_path();
 
 /*
  V1 of guiding path object
@@ -149,10 +165,6 @@ $(function()
         $("body").append("<a class='hello' href='#'>hello!</a>");
     });
 
-    $("body").append('<input type="button" class="show_next">');
-    $('.show_next').click(function () {
-       path.console_next_step(); 
-    });
 
 //    $("body").append("<a class='hello' href='#'>hello!</a>");
 });
