@@ -5,10 +5,9 @@ describe ("Path Lookup", function() {
         path = new path_p();
     });
 
-/*    it("we should get the uri", function()
+    it("Should be able to get the uri", function()
     {
-        console.log(path);
-        expect(path.uri).toBe("docfinder/_design/docs/_view");
+        expect(path.db_uri).toBeDefined();
     });
-*/
+
 });
