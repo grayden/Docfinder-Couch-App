@@ -1,12 +1,5 @@
 // lookup_object definitions
 
-// lookup object stuff
-/* var host = "127.0.0.1:5984"
-var uri = "/docfinder/_design/docfinder/";
-var view_prefix = "has";
-var selected_view = ""
-*/
-
 var custom_var_dump = function()
 {
     alert(this.host);
@@ -17,6 +10,7 @@ var custom_var_dump = function()
 
 var db_get = function()
 {
+    console.log(this.uri() + "/_view/" + this.view_prefix() + this.view());
     return couch.get(this.uri() + "/_view/" + this.view_prefix() + this.view());
 }
 
@@ -68,32 +62,27 @@ function filter(db_raw, view, property, match_value)
     return matches;
 }
 
-
-
-var first_call = function()
-{
-    lookup_inst.lookup_go(true);
-}
-
-
 // lookup object
 function lookup_go(first)
 {
     var view = lookup_inst.view();
+    var property;
+    var value; 
     if (first !== true)
     {
-        var property = lookup_inst.extract_property($(this));
-        var value = lookup_inst.match_value($(this));
+        property = lookup_inst.extract_property($(this));
+        value = lookup_inst.match_value($(this));
     }
     else
     {
         alert('First call');
-        var property = 'val';
-        var value = "1";    
+        property = 'val';
+        value = "1";    
     }
-console.log(lookup_inst);
-    $.when(lookup_inst.db_get()).then(function(retrieved_data){
 
+    $.when(lookup_inst.db_get()).then(function(retrieved_data){
+    
+console.log(retrieved_data);
         retrieved_data = filter(retrieved_data, view, property, value);
 
         // If filtered is something empty, cease!
@@ -114,6 +103,10 @@ console.log(lookup_inst);
     });     
 }
 
+var first_call = function()
+{
+    lookup_inst.lookup_go(true);
+}
 
 /***** LOOKUP OBJECT PROTOTYPE *****/
 var lookup = function()
