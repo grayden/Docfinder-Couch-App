@@ -33,11 +33,7 @@ path_proto.prototype.query_path = function()
     var doc_type = this.doc_type();
     var doc_property = this.doc_property();
     var doc_value = this.doc_value();
-    
-    console.log(doc_type);
-    console.log(doc_property);
-    console.log(doc_value);
-    
+        
     var view = this.query_tool.determine_needed_view(doc_type, doc_property);
     var specs = 'key=["' + doc_value + '","' + doc_type + '"]';
     this.query_tool.couch_query(view, specs);
@@ -56,8 +52,18 @@ path_proto.prototype.doc_property = function()
 
 path_proto.prototype.doc_value = function()
 {
-    // Only allows a path down the first matched value
     return (this.bay[0])?(this.bay[0].value[this.doc_property()]):this.start_value;
+    
+    if (!isset(this.bay[0]))
+        return this.start_value;
+    
+    var values = [];
+    for (var i in this.bay)
+    {
+        values.push(this.bay[i].value[this.doc_property()]);
+    }
+    console.log(values);
+    return values;         
 }
 
 path_proto.prototype.add_query_tool = function(tool)
@@ -85,20 +91,19 @@ function query_proto()
 query_proto.prototype.couch_query = function(view, specs)
 {
     var query = this.db_uri + "/" + view + "?" + specs;
-    console.log(query);
     $.get(query,
         function(data)
         {
             var obj = JSON.parse(data);
-            console.log(data);
             // Make reference better
             path.save_db_retrieved(obj);
-            
+
+            // the last time the query happens it spirals off into undefindes 
+            // then exits as it should - just not quite gracefully
             if (object_has_rows(obj))
                 path.query_path();
             else
             {
-                console.log(path.launch);
                 display.group_of_c_objects_to_dom(path.launch);
             }
         }
@@ -130,11 +135,6 @@ query_proto.prototype.add_path_tool = function(path_tool)
 display_proto = function()
 {
     this.objects;
-}
-
-display_proto.prototype.set_objects = function(objs)
-{
-    this.objects = objs;
 }
 
 display_proto.prototype.group_of_c_objects_to_dom = function(array)
@@ -172,8 +172,9 @@ var test_path = {
     start_type: "country",
     end_type: "dockey",
     start_property: "name",
-    start_value: "Canada",
+    start_value: "Germany",
     steps: [
+        // At first working mode, only [1] and [2] are being used
         ["country", "code", "city", "country.code"],
         ["city", "name", "dockey", "city.name"]
         ]
@@ -187,19 +188,6 @@ $(function(){
     path.query_path();
     
 });
-/*
- V1 of guiding path object
-var test_schema_array = [ 
-    // Read like this: Country can link to city because city has a country.code 
-    // which matches the code of country
-    {country: [["city", "country.code", "code"]]},
-    {city: [["country", "code", "country.code"], ["dockey", "city.name", "name"]]},
-    {dockey: [["city", "name", "city.name"]]}
-];
-*/
-
-
-
 
 /***** DEMO STUFF *****/
 
