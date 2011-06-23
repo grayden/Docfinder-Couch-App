@@ -99,6 +99,7 @@ query_proto.prototype.couch_query = function(view, specs)
             else
             {
                 console.log(path.launch);
+                display.group_of_c_objects_to_dom(path.launch);
             }
         }
     );
@@ -121,19 +122,50 @@ query_proto.prototype.determine_needed_view = function (type, property)
     return "no_view";
 }
 
+query_proto.prototype.add_path_tool = function(path_tool)
+{
+    this.path_tool = path_tool;
+}
+
+display_proto = function()
+{
+    this.objects;
+}
+
+display_proto.prototype.set_objects = function(objs)
+{
+    this.objects = objs;
+}
+
+display_proto.prototype.group_of_c_objects_to_dom = function(array)
+{
+    for (var i in path.launch)
+    {
+        $("body").append('<div class="object_group"></div>');
+        $("body").append('<hr>');
+        this.array_c_objects_to_dom(path.launch[i]);
+    }
+
+}
+
+display_proto.prototype.array_c_objects_to_dom = function(arr_of_objs)
+{
+    for (var i in arr_of_objs)
+    {
+        $(".object_group:last").append('<div class="object_holder"></div>');
+        $(".object_holder:last").append(JSON.stringify(arr_of_objs[i].value));
+    }
+}
+
 function object_has_rows(to_test)
 {
     if (to_test.rows && to_test.rows.length > 0) {return true;}
     return false;
 }
 
-query_proto.prototype.add_path_tool = function(path_tool)
-{
-    this.path_tool = path_tool;
-}
-
 var path = new path_proto();
 var query = new query_proto();
+var display = new display_proto();
 
 // V2 of guiding path object
 var test_path = {
@@ -147,11 +179,14 @@ var test_path = {
         ]
     };
 
-path.set_directions(test_path);
-path.add_query_tool(query);
-query.add_path_tool(path);
-path.query_path();
-
+$(function(){
+    
+    path.set_directions(test_path);
+    path.add_query_tool(query);
+    query.add_path_tool(path);
+    path.query_path();
+    
+});
 /*
  V1 of guiding path object
 var test_schema_array = [ 

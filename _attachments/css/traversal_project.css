@@ -1,0 +1,26 @@
+/* 
+    Document   : traversal_project.css
+    Created on : Jun 23, 2011, 9:34:53 AM
+    Author     : grayden
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+div.object_group
+{
+    border: solid black 1px;
+    margin-top: 5px;
+    margin-bottom; 5px;
+    padding: 5px;
+}
+
+div.object_holder
+{
+    border: solid blue 1px;
+    padding: 10px;
+}
