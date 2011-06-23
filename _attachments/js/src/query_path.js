@@ -34,33 +34,30 @@ path_proto.prototype.query_path = function()
     var doc_property = this.doc_property();
     var doc_value = this.doc_value();
     
+    console.log(doc_type);
+    console.log(doc_property);
+    console.log(doc_value);
+    
     var view = this.query_tool.determine_needed_view(doc_type, doc_property);
     var specs = 'key=["' + doc_value + '","' + doc_type + '"]';
     this.query_tool.couch_query(view, specs);
     this.go_to_next_step();
-    
 }
 
 path_proto.prototype.doc_type = function()
 {
-    return this.start_type;
-    
-    return (this.steps[this.current_step][2])?(this.steps[this.current_step][2]):this.start_type;
+    return (this.steps[this.current_step])?(this.steps[this.current_step][2]):this.start_type;
 }
 
 path_proto.prototype.doc_property = function()
 {
-    return this.start_property;
-    
-    return (this.steps[this.current_step][1])?(this.steps[this.current_step][1]):this.start_property;
+    return (this.steps[this.current_step])?(this.steps[this.current_step][1]):this.start_property;
 }
 
 path_proto.prototype.doc_value = function()
 {
-    return this.start_value;
-    
     // Only allows a path down the first matched value
-    return (this.bay[0].value[this.doc_property()])?(this.bay[0].value[this.doc_property()]):this.start_value;
+    return (this.bay[0])?(this.bay[0].value[this.doc_property()]):this.start_value;
 }
 
 path_proto.prototype.add_query_tool = function(tool)
@@ -72,8 +69,8 @@ path_proto.prototype.save_db_retrieved = function (obj)
 {
     if (this.bay[0])
         this.launch.push(this.bay);
-
-    this.bay = obj.rows;
+    
+        this.bay = obj.rows;
 }
 
 function query_proto()
@@ -94,9 +91,15 @@ query_proto.prototype.couch_query = function(view, specs)
         {
             var obj = JSON.parse(data);
             console.log(data);
-
             // Make reference better
             path.save_db_retrieved(obj);
+            
+            if (object_has_rows(obj))
+                path.query_path();
+            else
+            {
+                console.log(path.launch);
+            }
         }
     );
 }
@@ -111,11 +114,14 @@ query_proto.prototype.determine_needed_view = function (type, property)
     
     if ((type == "country" || type == "city") && (property == "country.code" || property == "code"))
         return "use_country_code";
+
+    if ((type == "city" || type == "dockey") && (property == "city.name" || property == "name"))
+        return "use_city_name";
     
     return "no_view";
 }
 
-function test_object_has_rows(to_test)
+function object_has_rows(to_test)
 {
     if (to_test.rows && to_test.rows.length > 0) {return true;}
     return false;
